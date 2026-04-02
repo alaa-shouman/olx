@@ -33,41 +33,41 @@ const ListingCard: React.FC<ListingCardProps> = ({ item, onPress, onFavoritePres
             <View style={styles.imageContainer}>
                 <Image source={{ uri: item.imageUrl }} style={styles.image} resizeMode="cover" />
                 <TouchableOpacity style={styles.favoriteBtn} onPress={onFavoritePress}>
-                    <Ionicons 
-                        name={item.isFavorite ? "heart" : "heart-outline"} 
-                        size={20} 
-                        color={item.isFavorite ? "#E53935" : "#FFFFFF"} 
+                    <Ionicons
+                        name={item.isFavorite ? "heart" : "heart-outline"}
+                        size={20}
+                        color={item.isFavorite ? "#E53935" : "#FFFFFF"}
                     />
                 </TouchableOpacity>
             </View>
-            
+
             <View style={styles.detailsContainer}>
                 <Text style={styles.price}>{item.currency} {item.price}</Text>
                 <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
-                
-                {item.meta && (
+
+                {item.meta ? (
                     <View style={styles.metaRow}>
-                        {item.meta.beds && (
+                        {item.meta.beds !== undefined ? (
                             <View style={styles.metaItem}>
                                 <Ionicons name="bed-outline" size={12} color="#757575" />
                                 <Text style={styles.metaText}>{item.meta.beds}</Text>
                             </View>
-                        )}
-                        {item.meta.baths && (
+                        ) : null}
+                        {item.meta.baths !== undefined ? (
                             <View style={styles.metaItem}>
                                 <Ionicons name="water-outline" size={12} color="#757575" />
                                 <Text style={styles.metaText}>{item.meta.baths}</Text>
                             </View>
-                        )}
-                        {item.meta.area && (
+                        ) : null}
+                        {item.meta.area !== undefined ? (
                             <View style={styles.metaItem}>
                                 <Ionicons name="scan-outline" size={12} color="#757575" />
                                 <Text style={styles.metaText}>{item.meta.area} m²</Text>
                             </View>
-                        )}
+                        ) : null}
                     </View>
-                )}
-                
+                ) : null}
+
                 <View style={styles.footerRow}>
                     <Text style={styles.locationText} numberOfLines={1}>{item.location}</Text>
                     <Text style={styles.timeText}>{item.timestamp}</Text>
