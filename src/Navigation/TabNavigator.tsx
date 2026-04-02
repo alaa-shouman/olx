@@ -3,6 +3,7 @@ import { I18nManager, StyleSheet, Text, View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
+
 import HomeScreen from '../Screen/Tabs/HomeScreen';
 import ChatsScreen from '../Screen/Tabs/ChatsScreen';
 import SellScreen from '../Screen/Tabs/SellScreen';
@@ -19,93 +20,103 @@ export type TabParamList = {
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
-const TAB_ACTIVE_COLOR = '#3B3B3B';
-const TAB_INACTIVE_COLOR = '#4A4A4A';
-const SELL_BG = '#F6D95B';
+// --- Theme & Configuration ---
+const THEME = {
+    colors: {
+        active: '#3B3B3B',
+        inactive: '#4A4A4A',
+        sellBg: '#F6D95B',
+        sellIcon: '#000000',
+        barBg: '#FFFFFF',
+    },
+    metrics: {
+        barHeight: 88,
+        iconSize: 24,
+        sellButtonSize: 60,
+        sellIconSize: 32,
+    }
+};
+
+interface TabConfig {
+    name: keyof TabParamList;
+    component: React.ComponentType<any>;
+    labelKey: string;
+    iconOutline: string;
+    iconSolid: string;
+    isAction?: boolean;
+}
+
+// Highly generic and reusable tab configuration
+const TABS_CONFIG: TabConfig[] = [
+    { name: 'Home', component: HomeScreen, labelKey: 'home', iconOutline: 'home-outline', iconSolid: 'home' },
+    { name: 'Chats', component: ChatsScreen, labelKey: 'chats', iconOutline: 'chatbubble-outline', iconSolid: 'chatbubble' },
+    { name: 'Sell', component: SellScreen, labelKey: 'sell', iconOutline: 'add', iconSolid: 'add', isAction: true },
+    { name: 'MyAds', component: MyAdsScreen, labelKey: 'myAds', iconOutline: 'list-outline', iconSolid: 'list' },
+    { name: 'Account', component: AccountScreen, labelKey: 'account', iconOutline: 'person-outline', iconSolid: 'person' },
+];
 
 const TabNavigator = () => {
     const { t } = useTranslation();
 
-    const getLabel = (routeName: keyof TabParamList) => {
-        switch (routeName) {
-            case 'Home':
-                return t('navigation.categories.tabs.home');
-            case 'Chats':
-                return t('navigation.categories.tabs.chats');
-            case 'Sell':
-                return t('navigation.categories.tabs.sell');
-            case 'MyAds':
-                return t('navigation.categories.tabs.myAds');
-            default:
-                return t('navigation.categories.tabs.account');
+    const renderIcon = (tab: TabConfig, focused: boolean) => {
+        if (tab.isAction) {
+            return (
+                <View style={styles.sellActionContainer}>
+                    <Ionicons
+                        name={tab.iconSolid}
+                        size={THEME.metrics.sellIconSize}
+                        color={THEME.colors.sellIcon}
+                    />
+                </View>
+            );
         }
+
+        const iconName = focused ? tab.iconSolid : tab.iconOutline;
+        const iconColor = focused ? THEME.colors.active : THEME.colors.inactive;
+        return <Ionicons name={iconName} size={THEME.metrics.iconSize} color={iconColor} />;
+    };
+
+    const renderLabel = (tab: TabConfig, focused: boolean) => {
+       // if (tab.isAction) return null; // Center action button has no text label
+
+        return (
+            <Text
+                style={[
+                    styles.tabLabel,
+                    { color: focused ? THEME.colors.active : THEME.colors.inactive },
+                ]}
+            >
+                {t(`navigation.categories.tabs.${tab.labelKey}`)}
+            </Text>
+        );
     };
 
     return (
         <Tab.Navigator
-            screenOptions={({ route }) => ({
-                headerShown: false,
-                tabBarShowLabel: true,
-                tabBarStyle: styles.tabBar,
-                tabBarItemStyle: styles.tabItem,
-                tabBarLabel: ({ focused }) => (
-                    <Text
-                        style={[
-                            styles.tabLabel,
-                            { color: focused ? TAB_ACTIVE_COLOR : TAB_INACTIVE_COLOR },
-                        ]}
-                    >
-                        {getLabel(route.name)}
-                    </Text>
-                ),
-                tabBarIcon: ({ focused }) => {
-                    if (route.name === 'Sell') {
-                        return (
-                            <View style={styles.sellIconWrapper}>
-                                <Ionicons name="add" size={32} color={TAB_ACTIVE_COLOR} />
-                            </View>
-                        );
-                    }
-
-                    const iconColor = focused ? TAB_ACTIVE_COLOR : TAB_INACTIVE_COLOR;
-
-                    if (route.name === 'Home') {
-                        return (
-                            <Ionicons
-                                name={focused ? 'home' : 'home-outline'}
-                                size={32}
-                                color={iconColor}
-                            />
-                        );
-                    }
-
-                    if (route.name === 'Chats') {
-                        return <Ionicons name="chatbubble-outline" size={34} color={iconColor} />;
-                    }
-
-                    if (route.name === 'MyAds') {
-                        return <Ionicons name="list-outline" size={34} color={iconColor} />;
-                    }
-
-                    return <Ionicons name="person-outline" size={34} color={iconColor} />;
-                },
-            })}
+            screenOptions={({ route }) => {
+                const currentTab = TABS_CONFIG.find(t => t.name === route.name);
+                return {
+                    headerShown: false,
+                    tabBarStyle: styles.tabBar,
+                    tabBarItemStyle: styles.tabItem,
+                    tabBarIcon: ({ focused }) => currentTab ? renderIcon(currentTab, focused) : null,
+                    tabBarLabel: ({ focused }) => currentTab ? renderLabel(currentTab, focused) : null,
+                };
+            }}
         >
-            <Tab.Screen name="Home" component={HomeScreen} />
-            <Tab.Screen name="Chats" component={ChatsScreen} />
-            <Tab.Screen name="Sell" component={SellScreen} />
-            <Tab.Screen name="MyAds" component={MyAdsScreen} />
-            <Tab.Screen name="Account" component={AccountScreen} />
+            {TABS_CONFIG.map((tab) => (
+                <Tab.Screen key={tab.name} name={tab.name} component={tab.component} />
+            ))}
         </Tab.Navigator>
     );
 };
 
 const styles = StyleSheet.create({
     tabBar: {
-        height: 88,
+        height: THEME.metrics.barHeight,
         paddingTop: 6,
         paddingBottom: 10,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: THEME.colors.barBg,
         borderTopWidth: 0,
         elevation: 0,
     },
@@ -113,21 +124,21 @@ const styles = StyleSheet.create({
         paddingTop: 2,
     },
     tabLabel: {
-        marginTop: 4,
         fontSize: 12,
         fontWeight: '700',
-        textTransform: 'none',
+        marginTop: 4,
     },
-    sellIconWrapper: {
-        width: 74,
-        height: 74,
-        borderRadius: 37,
-        backgroundColor: SELL_BG,
-        alignItems: 'center',
+    sellActionContainer: {
+        width: THEME.metrics.sellButtonSize,
+        height: THEME.metrics.sellButtonSize,
+        borderRadius: THEME.metrics.sellButtonSize / 2,
+        backgroundColor: THEME.colors.sellBg,
         justifyContent: 'center',
-        marginTop: -18,
-        marginStart: I18nManager.isRTL ? 4 : 0,
-        marginEnd: I18nManager.isRTL ? 0 : 4,
+        alignItems: 'center',
+        marginTop: -25,
+        // RTL logic to ensure perfect centering in both languages
+        marginStart: I18nManager.isRTL ? 0 : 0,
+        marginEnd: I18nManager.isRTL ? 0 : 0,
     },
 });
 
