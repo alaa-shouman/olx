@@ -1,18 +1,26 @@
-import { AxiosError } from "axios";
-import { createAxiosInstance } from "./axiosInstance";
+import { AxiosError } from 'axios';
+import { createAxiosInstance } from './axiosInstance';
 
-type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
-let baseURL =  "http://localhost:4001/";
+export const OLX_BASE_URL = 'https://www.olx.com.lb/api/';
+export const SEARCH_BASE_URL = 'https://search.mena.sector.run/';
 
 interface ApiOptions {
   method: HttpMethod;
   endpoint: string;
   data?: unknown;
   params?: unknown;
+  baseURL?: string;
 }
 
-export const apiClient = async ({ method, endpoint, data, params }: ApiOptions): Promise<unknown> => {
+export const apiClient = async ({
+  method,
+  endpoint,
+  data,
+  params,
+  baseURL = OLX_BASE_URL,
+}: ApiOptions): Promise<unknown> => {
   try {
     const instance = createAxiosInstance(baseURL);
     const response = await instance({
