@@ -1,0 +1,13 @@
+{
+    "navigation": {
+        "categories": {
+            "tabs": {
+                "home": "الرئيسية",
+                "chats": "الدردشات",
+                "sell": "بيع",
+                "myAds": "إعلاناتي",
+                "account": "حسابي"
+            }
+        }
+    }
+}

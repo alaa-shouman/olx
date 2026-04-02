@@ -1,0 +1,13 @@
+{
+    "navigation": {
+        "categories": {
+            "tabs": {
+                "home": "HOME",
+                "chats": "CHATS",
+                "sell": "Sell",
+                "myAds": "MY ADS",
+                "account": "ACCOUNT"
+            }
+        }
+    }
+}
