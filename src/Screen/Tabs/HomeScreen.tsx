@@ -1,5 +1,6 @@
-import React from 'react';
-import { StyleSheet, View, ScrollView, FlatList, StatusBar } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, ScrollView, StatusBar, ActivityIndicator, Text } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 
 import AppBar from '../../components/atoms/AppBar';
 import SearchField from '../../components/atoms/SearchField';
@@ -8,9 +9,10 @@ import CategoryItem, { CategoryData } from '../../components/molecules/CategoryI
 import ListingCard, { ListingData } from '../../components/molecules/ListingCard';
 import ImageBanner from '../../components/organisms/ImageBanner';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { getCategories } from '../../services/categories';
 
 // Mock Data
-const CATEGORIES: CategoryData[] = [
+const FALLBACK_CATEGORIES: CategoryData[] = [
     { id: '1', name: 'Motors', icon: 'car-sport-outline' },
     { id: '2', name: 'Property', icon: 'business-outline' },
     { id: '3', name: 'Jobs', icon: 'briefcase-outline' },
@@ -18,6 +20,17 @@ const CATEGORIES: CategoryData[] = [
     { id: '5', name: 'Furniture', icon: 'bed-outline' },
     { id: '6', name: 'More', icon: 'grid-outline' },
 ];
+
+const mapCategoryIcon = (id: string | number): string => {
+    const iconMap: Record<string, string> = {
+        '1': 'car-sport-outline', // Vehicles
+        '16': 'business-outline', // Properties
+        '4': 'laptop-outline', // Electronics
+        '7': 'briefcase-outline', // Jobs
+        '6': 'bed-outline', // Furniture
+    };
+    return iconMap[String(id)] || 'grid-outline';
+};
 
 const LISTINGS: ListingData[] = [
     {
@@ -39,7 +52,7 @@ const LISTINGS: ListingData[] = [
         imageUrl: 'https://via.placeholder.com/300x200.png?text=Car',
         location: 'Tripoli, North',
         timestamp: '5 hours ago',
-        meta: { area: 0 }, // Using area just as an example to test fallback
+        meta: { area: 0 },
         isFavorite: true,
     },
     {
@@ -54,60 +67,96 @@ const LISTINGS: ListingData[] = [
 ];
 
 const HomeScreen = () => {
+    const [categories, setCategories] = useState<CategoryData[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchRemoteCategories = async () => {
+            try {
+                setLoading(true);
+                const data = await getCategories() as any;
+                if (Array.isArray(data)) {
+                    const rootCats = data.filter((c: any) => c.parentID === null);
+                    const mapped = rootCats.map((c: any) => ({
+                        id: String(c.id),
+                        name: c.name || c.name_l1,
+                        icon: mapCategoryIcon(c.id),
+                    }));
+                    setCategories(mapped.length > 0 ? mapped : FALLBACK_CATEGORIES);
+                }
+            } catch (error) {
+                console.log('Failed to fetch categories, using fallback', error);
+                setCategories(FALLBACK_CATEGORIES);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchRemoteCategories();
+    }, []);
+
     return (
         <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
             <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-            <AppBar 
-                location="Lebanon" 
-                onLocationPress={() => {}} 
-                onNotificationPress={() => {}} 
+            <AppBar
+                location="Lebanon"
+                onLocationPress={() => { }}
+                onNotificationPress={() => { }}
             />
-            
-            <ScrollView 
+
+            <ScrollView
                 style={styles.container}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
                 <SearchField />
-                
+
                 <ImageBanner />
-                
-                <SectionHeader 
-                    title="All categories" 
-                    actionLabel="See all" 
-                    onActionPress={() => {}} 
+
+                <SectionHeader
+                    title="All categories"
+                    actionLabel="See all"
+                    onActionPress={() => { }}
                 />
-                
-                <FlatList
-                    horizontal
-                    data={CATEGORIES}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                        <CategoryItem item={item} onPress={() => {}} />
-                    )}
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.horizontalListPadding}
-                />
-                
-                <SectionHeader 
-                    title="Fresh recommendations" 
-                />
-                
-                <FlatList
-                    horizontal
-                    data={LISTINGS}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                        <ListingCard 
-                            item={item} 
-                            onPress={() => {}} 
-                            onFavoritePress={() => {}} 
+
+                <View style={styles.categoriesContainer}>
+                    {loading ? (
+                        <ActivityIndicator size="small" color="#F5C518" style={styles.loader} />
+                    ) : (
+                        <FlashList
+                            horizontal
+                            data={categories}
+                            keyExtractor={(item) => item.id}
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={styles.horizontalListPadding}
+                            renderItem={({ item }) => (
+                                <CategoryItem item={item as CategoryData} onPress={() => { }} />
+                            )}
                         />
                     )}
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.horizontalListPadding}
+                </View>
+
+                <SectionHeader
+                    title="Fresh recommendations"
                 />
-                
+
+                <View style={styles.listingsContainer}>
+                    <FlashList<ListingData>
+                        horizontal
+                        data={LISTINGS}
+                        keyExtractor={(item) => item.id}
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.horizontalListPadding}
+                        renderItem={({ item }) => (
+                            <ListingCard
+                                item={item as ListingData}
+                                onPress={() => { }}
+                                onFavoritePress={() => { }}
+                            />
+                        )}
+                    />
+                </View>
+
                 {/* Spacer for bottom navigation bar */}
                 <View style={styles.bottomSpacer} />
             </ScrollView>
@@ -127,11 +176,22 @@ const styles = StyleSheet.create({
     scrollContent: {
         paddingBottom: 20,
     },
+    categoriesContainer: {
+        height: 100,
+        width: '100%',
+    },
+    listingsContainer: {
+        height: 260,
+        width: '100%',
+    },
     horizontalListPadding: {
         paddingHorizontal: 16,
     },
+    loader: {
+        marginTop: 20,
+    },
     bottomSpacer: {
-        height: 80, 
+        height: 80,
     }
 });
 
