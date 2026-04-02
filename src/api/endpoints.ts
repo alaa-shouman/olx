@@ -1,6 +1,12 @@
 export const ENDPOINTS = {
-  CATEGORIES: '/categories',
-  CATEGORY_FIELDS:
-    '/categoryFields?includeChildCategories=true&splitByCategoryIDs=true&flatChoices=true&groupChoicesBySection=true&flat=true',
-  MSEARCH: '/_msearch',
+  Categories: {
+    List: 'categories',
+    Fields: 'categoryFields',
+  },
+  Ads: {
+    Search: '_msearch',
+  },
+  Locations: {
+    Search: '_msearch',
+  },
 };

@@ -12,6 +12,7 @@ interface ApiOptions {
   data?: unknown;
   params?: unknown;
   baseURL?: string;
+  headers?: Record<string, string>;
 }
 
 export const apiClient = async ({
@@ -20,6 +21,7 @@ export const apiClient = async ({
   data,
   params,
   baseURL = OLX_BASE_URL,
+  headers,
 }: ApiOptions): Promise<unknown> => {
   try {
     const instance = createAxiosInstance(baseURL);
@@ -28,6 +30,7 @@ export const apiClient = async ({
       url: endpoint,
       data,
       params,
+      headers,
       // timeout:50000,
     });
     return response.data;
