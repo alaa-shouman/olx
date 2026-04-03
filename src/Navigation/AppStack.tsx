@@ -1,9 +1,13 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import TabNavigator from './TabNavigator';
+import SearchScreen from '../Screen/SearchScreen';
+import FilterScreen from '../Screen/FilterScreen';
 
 export type AppStackParamList = {
     MainTabs: undefined;
+    SearchScreen: { query?: string; categoryId?: string };
+    FilterScreen: { categoryId?: string };
 };
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -18,6 +22,8 @@ const AppStack = () => {
             }}
         >
             <Stack.Screen name="MainTabs" component={TabNavigator} />
+            <Stack.Screen name="SearchScreen" component={SearchScreen} />
+            <Stack.Screen name="FilterScreen" component={FilterScreen} />
         </Stack.Navigator>
     );
 };

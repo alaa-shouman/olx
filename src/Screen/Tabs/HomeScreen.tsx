@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, ScrollView, StatusBar, ActivityIndicator, Text } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useTranslation } from 'react-i18next';
+import { useNavigation } from '@react-navigation/native';
 
 import AppBar from '../../components/atoms/AppBar';
 import SearchField from '../../components/atoms/SearchField';
@@ -69,6 +70,7 @@ const LISTINGS: ListingData[] = [
 ];
 
 const HomeScreen = () => {
+    const navigation: any = useNavigation();
     const { i18n, t } = useTranslation();
     const isArabic = i18n.language === 'ar';
     const langKey = isArabic ? 'ar' : 'en';
@@ -193,7 +195,7 @@ const HomeScreen = () => {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
-                <SearchField />
+                <SearchField onPress={() => navigation.navigate('SearchScreen')} />
 
                 <ImageBanner />
 

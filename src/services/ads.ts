@@ -87,6 +87,8 @@ export const fetchAds = async (
       data: payload,
       headers: {
         'Content-Type': 'application/x-ndjson',
+        Authorization:
+          'Basic b2x4LWxiLXByb2R1Y3Rpb24tc2VhcmNoOj5zK08zPXM5QEk0REYwSWEldWc/N1FQdXkye0RqW0Zy',
       },
     });
 
@@ -143,6 +145,8 @@ export const fetchLocations = async (
       data: payload,
       headers: {
         'Content-Type': 'application/x-ndjson',
+        Authorization:
+          'Basic b2x4LWxiLXByb2R1Y3Rpb24tc2VhcmNoOj5zK08zPXM5QEk0REYwSWEldWc/N1FQdXkye0RqW0Zy',
       },
     });
 
