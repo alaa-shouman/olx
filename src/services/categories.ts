@@ -1,6 +1,10 @@
 import { apiClient, OLX_BASE_URL } from '../api/base';
 import { ENDPOINTS } from '../api/endpoints';
-import { CategoryResponse, CategoryFieldsResponse } from '../validation';
+import {
+  CategoryResponse,
+  CategoryFieldsResponse,
+  DynamicFilter,
+} from '../validation';
 
 export const getCategories = async (): Promise<CategoryResponse> => {
   try {
@@ -45,4 +49,42 @@ export const getCategoryFields = async (): Promise<CategoryFieldsResponse> => {
       originalError: error,
     };
   }
+};
+
+/**
+ * Validates and maps the raw API response for a specific category ID into generic UI filters.
+ * Ideal for rendering dynamic forms for Vehicles, Mobiles, Properties, etc.
+ */
+export const mapCategoryFieldsToFilters = (
+  response: CategoryFieldsResponse,
+  categoryId: string | number,
+): DynamicFilter[] => {
+  const categoryData = response[String(categoryId)];
+  if (!categoryData || !categoryData.flatFields) {
+    return [];
+  }
+
+  return categoryData.flatFields
+    .filter((field: any) => field.roles?.includes('filterable'))
+    .map((field: any): DynamicFilter => {
+      const isChoice = field.filterType === 'multiple_choice';
+
+      return {
+        id: field.id,
+        name: field.name || '',
+        attribute: field.attribute,
+        valueType: field.valueType,
+        filterType: field.filterType || 'unknown',
+        minValue: field.minValue ?? null,
+        maxValue: field.maxValue ?? null,
+        choices:
+          isChoice && Array.isArray(field.choices)
+            ? field.choices.map((c: any) => ({
+                id: c.id,
+                label: c.label || c.value,
+                value: c.value,
+              }))
+            : undefined,
+      };
+    });
 };

@@ -8,9 +8,30 @@ export interface CategoryFieldsResponse {
   [categoryId: string]: any; // Object key represents category id
 }
 
+export interface FilterChoice {
+  id: number;
+  label: string;
+  value: string;
+}
+
+export interface DynamicFilter {
+  id: number;
+  name: string;
+  attribute: string;
+  filterType: 'multiple_choice' | 'range' | 'boolean' | string;
+  valueType: string;
+  choices?: FilterChoice[];
+  minValue?: number | null;
+  maxValue?: number | null;
+}
+
 export interface FetchAdsPayload {
   categoryId: string;
   locationId: string;
+  priceMin?: number;
+  priceMax?: number;
+  searchTerm?: string;
+  language?: 'en' | 'ar';
   from?: number;
   size?: number;
 }
@@ -22,6 +43,7 @@ export interface FetchAdsResponse {
 export interface FetchLocationsPayload {
   hierarchyExternalID?: string;
   level?: number;
+  language?: 'en' | 'ar';
   from?: number;
   size?: number;
 }
