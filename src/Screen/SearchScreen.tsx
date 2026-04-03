@@ -32,20 +32,23 @@ const SearchScreen = ({ navigation, route }: any) => {
             setAds(hits.map((h: any, index: number) => {
                 const source = h._source;
                 const parameters = source.parameters || [];
-                
+
                 // Helper to extract dynamic field parameters safely
                 const getParam = (key: string) => {
                     const param = parameters.find((p: any) => p.key === key);
                     return param ? param.value : undefined;
                 };
 
+                const title = isArabic ? (source.title_l1 || source.title) : source.title;
+                const locName = isArabic ? (source.location?.name_l1 || source.location?.name) : (source.location?.name || source.location?.pathName);
+
                 return {
                     id: String(source.id),
-                    title: source.title,
+                    title: title,
                     price: source.price?.value?.display || (source.price?.value?.amount ? source.price.value.amount.toLocaleString() : '0'),
                     currency: source.price?.currency?.isoCode || 'USD',
                     imageUrl: source.mainImage?.url || source.images?.[0]?.url,
-                    location: source.location?.name || source.location?.pathName || '',
+                    location: locName || '',
                     timestamp: new Date(source.created_at || Date.now()).toLocaleDateString(),
                     isElite: index === 0, // Mocking first item as Elite for UI demo
                     meta: {
@@ -92,8 +95,8 @@ const SearchScreen = ({ navigation, route }: any) => {
 
             {/* Sub Filter Row */}
             <View style={styles.filterRowContainer}>
-                <FlatList 
-                    horizontal 
+                <FlatList
+                    horizontal
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.filterRow}
                     data={[
@@ -103,8 +106,8 @@ const SearchScreen = ({ navigation, route }: any) => {
                     ]}
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
-                        <TouchableOpacity 
-                            style={[styles.pill, item.active && styles.pillActive]} 
+                        <TouchableOpacity
+                            style={[styles.pill, item.active && styles.pillActive]}
                             onPress={() => item.id === 'filter' ? navigation.navigate('FilterScreen', { categoryId: initialCategory }) : null}
                         >
                             {item.isIcon && <Ionicons name={item.icon!} size={16} color={item.active ? '#00BCD4' : '#3B3B3B'} style={styles.pillIcon} />}
@@ -121,7 +124,7 @@ const SearchScreen = ({ navigation, route }: any) => {
                 <Text style={styles.resultsText}>Showing: {totalHits} Results</Text>
                 <TouchableOpacity style={styles.sortToggle}>
                     <Text style={styles.sortText}>Sort By</Text>
-                    <Ionicons name="swap-vertical" size={16} color="#00BCD4" style={{marginStart: 4}} />
+                    <Ionicons name="swap-vertical" size={16} color="#00BCD4" style={{ marginStart: 4 }} />
                 </TouchableOpacity>
             </View>
 
@@ -132,12 +135,12 @@ const SearchScreen = ({ navigation, route }: any) => {
                     data={ads}
                     keyExtractor={item => item.id}
                     renderItem={({ item }) => (
-                        <SearchListingCard 
-                            item={item} 
-                            onPress={() => {}} 
-                            onFavoritePress={() => {}} 
-                            onCallPress={() => {}}
-                            onWhatsAppPress={() => {}}
+                        <SearchListingCard
+                            item={item}
+                            onPress={() => { }}
+                            onFavoritePress={() => { }}
+                            onCallPress={() => { }}
+                            onWhatsAppPress={() => { }}
                         />
                     )}
                     contentContainerStyle={styles.listPadding}
@@ -162,34 +165,34 @@ const SearchScreen = ({ navigation, route }: any) => {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#FFFFFF' },
-    header: { 
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        paddingHorizontal: 16, 
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 16,
         paddingVertical: 12,
         backgroundColor: '#FFFFFF',
     },
-    backButton: { 
+    backButton: {
         marginEnd: 12,
         padding: 4,
     },
-    searchContainer: { 
-        flex: 1, 
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        borderWidth: 1, 
-        borderColor: '#E0E0E0', 
-        borderRadius: 8, 
-        paddingHorizontal: 12, 
+    searchContainer: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
+        borderRadius: 8,
+        paddingHorizontal: 12,
         height: 44,
         backgroundColor: '#FFFFFF',
     },
-    searchIcon: { 
-        marginEnd: 8 
+    searchIcon: {
+        marginEnd: 8
     },
-    searchInput: { 
-        flex: 1, 
-        height: '100%', 
+    searchInput: {
+        flex: 1,
+        height: '100%',
         color: '#212121',
         fontSize: 14,
         paddingVertical: 0,
@@ -198,57 +201,57 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderColor: '#EEEEEE',
     },
-    filterRow: { 
-        paddingHorizontal: 16, 
+    filterRow: {
+        paddingHorizontal: 16,
         paddingVertical: 12,
         flexDirection: 'row',
         alignItems: 'center',
     },
-    pill: { 
+    pill: {
         flexDirection: 'row',
         alignItems: 'center',
-        borderWidth: 1, 
-        borderColor: '#E0E0E0', 
-        borderRadius: 20, 
-        paddingHorizontal: 16, 
-        paddingVertical: 8, 
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
+        borderRadius: 20,
+        paddingHorizontal: 16,
+        paddingVertical: 8,
         marginEnd: 8,
         backgroundColor: '#FFFFFF',
     },
-    pillActive: { 
-        backgroundColor: '#E0F7FA', 
-        borderColor: '#00BCD4', 
+    pillActive: {
+        backgroundColor: '#E0F7FA',
+        borderColor: '#00BCD4',
     },
     pillIcon: {
         marginEnd: 6,
     },
-    pillText: { 
-        color: '#3B3B3B', 
+    pillText: {
+        color: '#3B3B3B',
         fontSize: 14,
         fontWeight: '500',
     },
-    pillTextActive: { 
-        color: '#00BCD4', 
+    pillTextActive: {
+        color: '#00BCD4',
         fontWeight: 'bold',
     },
-    resultsInfoRow: { 
-        flexDirection: 'row', 
-        justifyContent: 'space-between', 
+    resultsInfoRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 16, 
+        paddingHorizontal: 16,
         paddingVertical: 16,
     },
-    resultsText: { 
-        fontSize: 14, 
-        color: '#212121', 
+    resultsText: {
+        fontSize: 14,
+        color: '#212121',
         fontWeight: 'bold',
     },
     sortToggle: {
         flexDirection: 'row',
         alignItems: 'center',
     },
-    sortText: { 
-        fontSize: 14, 
+    sortText: {
+        fontSize: 14,
         color: '#00BCD4',
         fontWeight: '600',
     },
@@ -269,7 +272,7 @@ const styles = StyleSheet.create({
         color: '#00BCD4',
         fontWeight: '600',
     },
-    listPadding: { 
+    listPadding: {
         paddingHorizontal: 16,
         paddingBottom: 24,
     }

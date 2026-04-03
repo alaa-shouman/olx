@@ -36,10 +36,10 @@ export const fetchAds = async (
       mustConditions.push({ term: { 'category.externalID': categoryId } });
     }
 
-    if (locationId && locationId !== '1-30') {
-      // Hierarchy filter mapping as observed in realistic Classifieds implementations
+    if (locationId && locationId !== '0-1') {
+      // Filter by location externalID directly against the location array
       mustConditions.push({
-        term: { 'location.hierarchy.externalID': locationId },
+        term: { 'location.externalID': locationId },
       });
     }
 
@@ -123,7 +123,9 @@ export const fetchLocations = async (
     const mustConditions: any[] = [{ term: { level: level } }];
 
     if (hierarchyExternalID) {
-      mustConditions.push({ term: { 'hierarchy.externalID': hierarchyExternalID } });
+      mustConditions.push({
+        term: { 'hierarchy.externalID': hierarchyExternalID },
+      });
     }
 
     const query = JSON.stringify({

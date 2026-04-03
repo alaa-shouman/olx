@@ -58,25 +58,30 @@ const HomeScreen = () => {
     const [locationModalVisible, setLocationModalVisible] = useState(false);
     const [selectedLocation, setSelectedLocation] = useState({
         name: isArabic ? 'كل لبنان' : 'All Lebanon',
-        id: '0',
-        externalID: '1-30'
+        id: '1',
+        externalID: '0-1'
     });
 
-    const formatAd = (h: any): ListingData => ({
-        id: String(h._source.id),
-        title: h._source.title,
-        price: h._source.price?.value?.display || (h._source.price?.value?.amount ? h._source.price.value.amount.toLocaleString() : '0'),
-        currency: h._source.price?.currency?.isoCode || 'USD',
-        imageUrl: h._source.mainImage?.url || h._source.images?.[0]?.url || 'https://via.placeholder.com/300x200.png?text=No+Image',
-        location: h._source.location?.name || h._source.location?.pathName || '',
-        timestamp: new Date(h._source.created_at || Date.now()).toLocaleDateString(),
-        isFavorite: false,
-        meta: {
-            beds: h._source.parameters?.find((p: any) => p.key === 'rooms')?.value,
-            baths: h._source.parameters?.find((p: any) => p.key === 'bathrooms')?.value,
-            area: h._source.parameters?.find((p: any) => p.key === 'area')?.value,
-        }
-    });
+    const formatAd = (h: any): ListingData => {
+        const title = isArabic ? (h._source.title_l1 || h._source.title) : h._source.title;
+        const locName = isArabic ? (h._source.location?.name_l1 || h._source.location?.name) : (h._source.location?.name || h._source.location?.pathName);
+
+        return {
+            id: String(h._source.id),
+            title: title,
+            price: h._source.price?.value?.display || (h._source.price?.value?.amount ? h._source.price.value.amount.toLocaleString() : '0'),
+            currency: h._source.price?.currency?.isoCode || 'USD',
+            imageUrl: h._source.mainImage?.url || h._source.images?.[0]?.url || 'https://via.placeholder.com/300x200.png?text=No+Image',
+            location: locName || '',
+            timestamp: new Date(h._source.created_at || Date.now()).toLocaleDateString(),
+            isFavorite: false,
+            meta: {
+                beds: h._source.parameters?.find((p: any) => p.key === 'rooms')?.value,
+                baths: h._source.parameters?.find((p: any) => p.key === 'bathrooms')?.value,
+                area: h._source.parameters?.find((p: any) => p.key === 'area')?.value,
+            }
+        };
+    };
 
     const loadCategoryAds = async (categoryId: string, language: string, locationId: string) => {
         try {
@@ -104,7 +109,7 @@ const HomeScreen = () => {
                 .slice(0, 6)
                 .map((c: any) => ({
                     id: String(c.id),
-                    name: c.name,
+                    name: isArabic ? (c.name_l1 || c.name) : c.name,
                     icon: mapCategoryIcon(c.id)
                 }));
 
@@ -162,7 +167,7 @@ const HomeScreen = () => {
             <AppBar
                 location={selectedLocation.name}
                 onLocationPress={() => setLocationModalVisible(true)}
-                onNotificationPress={() => {}}
+                onNotificationPress={() => { }}
             />
 
             <ScrollView
@@ -180,7 +185,7 @@ const HomeScreen = () => {
                 <SectionHeader
                     title={t('home.allCategories', 'All categories')}
                     actionLabel={t('home.seeAll', 'See all')}
-                    onActionPress={() => {}}
+                    onActionPress={() => { }}
                 />
 
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalListPadding}>
@@ -210,8 +215,8 @@ const HomeScreen = () => {
                                     <ListingCard
                                         key={item.id}
                                         item={item}
-                                        onPress={() => {}}
-                                        onFavoritePress={() => {}}
+                                        onPress={() => { }}
+                                        onFavoritePress={() => { }}
                                     />
                                 ))}
                             </ScrollView>

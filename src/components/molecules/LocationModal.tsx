@@ -37,16 +37,16 @@ const LocationModal: React.FC<LocationModalProps> = ({ visible, onClose, onSelec
                 level: 1,
                 language: isArabic ? 'ar' : 'en'
             } as any);
-            
+
             const hits = response.responses?.[0]?.hits?.hits || [];
             const mapped = hits.map((h: any) => ({
                 id: String(h._source.id),
-                name: h._source.name,
+                name: isArabic ? (h._source.name_l1 || h._source.name) : h._source.name,
                 externalID: h._source.externalID || String(h._source.id),
             }));
-            
+
             // Add "All Lebanon" option
-            setLocations([{ id: '0', name: isArabic ? 'كل لبنان' : 'All Lebanon', externalID: '1-30' }, ...mapped]);
+            setLocations([{ id: '1', name: isArabic ? 'كل لبنان' : 'All Lebanon', externalID: '0-1' }, ...mapped]);
         } catch (error) {
             console.log('Error fetching locations:', error);
         } finally {
