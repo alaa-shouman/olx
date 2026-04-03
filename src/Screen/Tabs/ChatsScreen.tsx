@@ -1,10 +1,12 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 const ChatsScreen = () => {
+    const { t } = useTranslation();
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Chats Screen</Text>
+            <Text style={styles.title}>{t('navigation.categories.tabs.chats', 'CHATS')}</Text>
         </View>
     );
 };

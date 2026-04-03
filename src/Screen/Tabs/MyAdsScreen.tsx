@@ -1,10 +1,12 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 const MyAdsScreen = () => {
+    const { t } = useTranslation();
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>My Ads Screen</Text>
+            <Text style={styles.title}>{t('navigation.categories.tabs.myAds', 'MY ADS')}</Text>
         </View>
     );
 };

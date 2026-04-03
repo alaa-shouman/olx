@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const AccountScreen = () => {
     const { t, i18n } = useTranslation();
+    const isArabic = i18n.language === 'ar';
 
     const toggleLanguage = async () => {
         const newLang = i18n.language === 'en' ? 'ar' : 'en';
@@ -38,7 +39,7 @@ const AccountScreen = () => {
                         <View style={styles.menuTexts}>
                             <Text style={styles.menuTitle}>{t('account.blog', 'Blog')}</Text>
                         </View>
-                        <Ionicons name="chevron-forward" size={20} color="#1E2329" />
+                        <Ionicons name={isArabic ? "chevron-back" : "chevron-forward"} size={20} color="#1E2329" />
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.menuItem}>
@@ -49,7 +50,7 @@ const AccountScreen = () => {
                             <Text style={styles.menuTitle}>{t('account.helpAndSupport', 'Help & Support')}</Text>
                             <Text style={styles.menuSubtitle}>{t('account.helpCenter', 'Help center and legal terms')}</Text>
                         </View>
-                        <Ionicons name="chevron-forward" size={20} color="#1E2329" />
+                        <Ionicons name={isArabic ? "chevron-back" : "chevron-forward"} size={20} color="#1E2329" />
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.menuItem}>
@@ -58,7 +59,7 @@ const AccountScreen = () => {
                             <Text style={styles.menuTitle}>{t('account.customerSupport', 'Customer Support')}</Text>
                             <Text style={styles.menuSubtitle}>{t('account.getAssistance', 'Get assistance from our support team')}</Text>
                         </View>
-                        <Ionicons name="chevron-forward" size={20} color="#1E2329" />
+                        <Ionicons name={isArabic ? "chevron-back" : "chevron-forward"} size={20} color="#1E2329" />
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.menuItem} onPress={toggleLanguage}>
@@ -67,7 +68,7 @@ const AccountScreen = () => {
                             <Text style={styles.menuTitle}>{t('account.changeLanguageTitle', 'العربية')}</Text>
                             <Text style={styles.menuSubtitle}>{t('account.changeLanguage', 'Change language')}</Text>
                         </View>
-                        <Ionicons name="chevron-forward" size={20} color="#1E2329" />
+                        <Ionicons name={isArabic ? "chevron-back" : "chevron-forward"} size={20} color="#1E2329" />
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.menuItem}>
@@ -75,7 +76,7 @@ const AccountScreen = () => {
                         <View style={styles.menuTexts}>
                             <Text style={styles.menuTitle}>{t('account.settings', 'Settings')}</Text>
                         </View>
-                        <Ionicons name="chevron-forward" size={20} color="#1E2329" />
+                        <Ionicons name={isArabic ? "chevron-back" : "chevron-forward"} size={20} color="#1E2329" />
                     </TouchableOpacity>
                 </View>
 

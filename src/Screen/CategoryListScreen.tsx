@@ -92,7 +92,7 @@ const CategoryListScreen = ({ navigation, route }: any) => {
                             })}
                         >
                             <Text style={styles.seeAllText}>
-                                {isArabic ? `بحث في ${parentName}` : `Search in ${parentName}`}
+                                {t('categories.seeAllIn', { name: parentName })}
                             </Text>
                         </TouchableOpacity>
                     )}

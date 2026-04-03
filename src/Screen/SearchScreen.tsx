@@ -97,8 +97,8 @@ const SearchScreen = ({ navigation, route }: any) => {
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.filterRow}
                     data={[
-                        { id: 'filter', label: 'Filters', isIcon: true, icon: 'options-outline', active: true },
-                        { id: 'category', label: initialCategoryName || 'Category' },
+                        { id: 'filter', label: t('searchScreen.filters', 'Filters'), isIcon: true, icon: 'options-outline', active: true },
+                        { id: 'category', label: initialCategoryName || t('searchScreen.category', 'Category') },
                     ]}
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
@@ -123,9 +123,9 @@ const SearchScreen = ({ navigation, route }: any) => {
 
             {/* Results Count & Sorting */}
             <View style={styles.resultsInfoRow}>
-                <Text style={styles.resultsText}>Showing: {totalHits} Results</Text>
+                <Text style={styles.resultsText}>{t('searchScreen.showingResults', { count: totalHits })}</Text>
                 <TouchableOpacity style={styles.sortToggle}>
-                    <Text style={styles.sortText}>Sort By</Text>
+                    <Text style={styles.sortText}>{t('searchScreen.sortBy', 'Sort By')}</Text>
                     <Ionicons name="swap-vertical" size={16} color="#00BCD4" style={{ marginStart: 4 }} />
                 </TouchableOpacity>
             </View>
@@ -150,9 +150,9 @@ const SearchScreen = ({ navigation, route }: any) => {
                         if (ads.length > 0 && ads[0].isElite) {
                             return (
                                 <View style={styles.eliteHeaderSection}>
-                                    <Text style={styles.eliteSectionTitle}>Elite Ads</Text>
+                                    <Text style={styles.eliteSectionTitle}>{t('searchScreen.eliteAds', 'Elite Ads')}</Text>
                                     <TouchableOpacity>
-                                        <Text style={styles.viewMoreText}>View more</Text>
+                                        <Text style={styles.viewMoreText}>{t('searchScreen.viewMore', 'View more')}</Text>
                                     </TouchableOpacity>
                                 </View>
                             );

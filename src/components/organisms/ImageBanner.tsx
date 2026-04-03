@@ -1,27 +1,29 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
 
 const ImageBanner: React.FC = () => {
+    const { t } = useTranslation();
     return (
         <View style={styles.container}>
             <View style={styles.contentContainer}>
                 <View style={styles.textContainer}>
-                    <Text style={styles.title}>Everything you need</Text>
-                    <Text style={styles.subtitle}>in one place</Text>
+                    <Text style={styles.title}>{t('banner.title', 'Everything you need')}</Text>
+                    <Text style={styles.subtitle}>{t('banner.subtitle', 'in one place')}</Text>
                 </View>
                 {/* Placeholder for the cyan blob and family photo */}
                 <View style={styles.imageWrapper}>
                     <View style={styles.cyanBlob} />
-                    <Image 
-                        source={{ uri: 'https://via.placeholder.com/150x150.png?text=Family' }} 
+                    <Image
+                        source={{ uri: 'https://via.placeholder.com/150x150.png?text=Family' }}
                         style={styles.image}
                         resizeMode="contain"
                     />
                 </View>
             </View>
-            
+
             {/* Pagination dots implied */}
             <View style={styles.pagination}>
                 <View style={[styles.dot, styles.activeDot]} />

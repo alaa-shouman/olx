@@ -1,10 +1,12 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 const SellScreen = () => {
+    const { t } = useTranslation();
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Sell Screen</Text>
+            <Text style={styles.title}>{t('navigation.categories.tabs.sell', 'Sell')}</Text>
         </View>
     );
 };

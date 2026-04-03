@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, I18nManager } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useTranslation } from 'react-i18next';
 
 export interface MetaItemData {
     key: string;
@@ -30,12 +31,13 @@ interface SearchListingCardProps {
 }
 
 const SearchListingCard: React.FC<SearchListingCardProps> = ({ item, onPress, onFavoritePress, onWhatsAppPress, onCallPress }) => {
+    const { t } = useTranslation();
     return (
         <TouchableOpacity style={[styles.container, item.isElite && styles.eliteContainer]} onPress={onPress} activeOpacity={0.9}>
             {item.isElite && (
                 <View style={styles.eliteHeader}>
                     <Ionicons name="star" size={12} color="#FFFFFF" style={styles.eliteIcon} />
-                    <Text style={styles.eliteText}>ELITE</Text>
+                    <Text style={styles.eliteText}>{t('listing.elite', 'ELITE')}</Text>
                 </View>
             )}
             <View style={styles.imageContainer}>
@@ -74,11 +76,11 @@ const SearchListingCard: React.FC<SearchListingCardProps> = ({ item, onPress, on
             <View style={styles.actionsContainer}>
                 <TouchableOpacity style={styles.callButton} onPress={onCallPress}>
                     <Ionicons name="call-outline" size={18} color="#3B3B3B" />
-                    <Text style={styles.callText}>Call</Text>
+                    <Text style={styles.callText}>{t('listing.call', 'Call')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.whatsappButton} onPress={onWhatsAppPress}>
                     <Ionicons name="logo-whatsapp" size={18} color="#FFFFFF" />
-                    <Text style={styles.whatsappText}>WhatsApp</Text>
+                    <Text style={styles.whatsappText}>{t('listing.whatsapp', 'WhatsApp')}</Text>
                 </TouchableOpacity>
             </View>
         </TouchableOpacity>

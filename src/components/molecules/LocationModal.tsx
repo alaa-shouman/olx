@@ -61,7 +61,7 @@ const LocationModal: React.FC<LocationModalProps> = ({ visible, onClose, onSelec
                     <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
                         <Ionicons name="close" size={28} color="#212121" />
                     </TouchableOpacity>
-                    <Text style={styles.title}>{isArabic ? 'اختر الموقع' : 'Select Location'}</Text>
+                    <Text style={styles.title}>{t('locationModal.title', 'Select Location')}</Text>
                     <View style={{ width: 40 }} />
                 </View>
 

@@ -1,13 +1,60 @@
 {
-    "navigation": {
-        "categories": {
-            "tabs": {
-                "home": "الرئيسية",
-                "chats": "الدردشات",
-                "sell": "بيع",
-                "myAds": "إعلاناتي",
-                "account": "حسابي"
-            }
-        }
+  "navigation": {
+    "categories": {
+      "tabs": {
+        "home": "الرئيسية",
+        "chats": "الدردشات",
+        "sell": "بيع",
+        "myAds": "إعلاناتي",
+        "account": "حسابي"
+      }
     }
+  },
+  "search": { "placeholder": "عما تبحث؟" },
+  "home": {
+    "categories": "الفئات",
+    "seeAll": "عرض الكل",
+    "freshAds": "توصيات جديدة",
+    "location": "الموقع"
+  },
+  "filter": {
+    "title": "الفلاتر",
+    "clearAll": "مسح الكل",
+    "change": "تغيير",
+    "location": "الموقع",
+    "allCountry": "كل البلد",
+    "any": "أي",
+    "yes": "نعم",
+    "apply": "أظهر النتائج"
+  },
+  "searchScreen": {
+    "filters": "فلاتر",
+    "category": "الفئة",
+    "showingResults": "عرض: {{count}} نتيجة",
+    "sortBy": "فرز حسب",
+    "eliteAds": "إعلانات مميزة",
+    "viewMore": "عرض المزيد"
+  },
+  "categories": {
+    "seeAllIn": "عرض الكل في {{name}}",
+    "allIn": "الكل في {{name}}"
+  },
+  "listing": { "call": "اتصال", "whatsapp": "واتساب", "elite": "مميز" },
+  "locationModal": { "title": "اختر الموقع" },
+  "account": {
+    "title": "حسابي",
+    "login": "تسجيل الدخول",
+    "loginToYourAccount": "تسجيل الدخول إلى حسابك",
+    "blog": "المدونة",
+    "helpAndSupport": "المساعدة والدعم",
+    "helpCenter": "مركز المساعدة والشروط القانونية",
+    "customerSupport": "دعم العملاء",
+    "getAssistance": "احصل على مساعدة من فريق الدعم لدينا",
+    "changeLanguageTitle": "English",
+    "changeLanguage": "تغيير اللغة",
+    "settings": "الإعدادات",
+    "logInBtn": "دخول",
+    "createNewAccount": "إنشاء حساب جديد"
+  },
+  "banner": { "title": "كل ما تحتاجه", "subtitle": "في مكان واحد" }
 }

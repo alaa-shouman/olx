@@ -1,13 +1,60 @@
 {
-    "navigation": {
-        "categories": {
-            "tabs": {
-                "home": "HOME",
-                "chats": "CHATS",
-                "sell": "Sell",
-                "myAds": "MY ADS",
-                "account": "ACCOUNT"
-            }
-        }
+  "navigation": {
+    "categories": {
+      "tabs": {
+        "home": "HOME",
+        "chats": "CHATS",
+        "sell": "Sell",
+        "myAds": "MY ADS",
+        "account": "ACCOUNT"
+      }
     }
+  },
+  "search": { "placeholder": "What are you looking for?" },
+  "home": {
+    "categories": "Categories",
+    "seeAll": "See all",
+    "freshAds": "Fresh recommendations",
+    "location": "Location"
+  },
+  "filter": {
+    "title": "Filters",
+    "clearAll": "Clear all",
+    "change": "Change",
+    "location": "Location",
+    "allCountry": "All country",
+    "any": "Any",
+    "yes": "Yes",
+    "apply": "See Results"
+  },
+  "searchScreen": {
+    "filters": "Filters",
+    "category": "Category",
+    "showingResults": "Showing: {{count}} Results",
+    "sortBy": "Sort By",
+    "eliteAds": "Elite Ads",
+    "viewMore": "View more"
+  },
+  "categories": {
+    "seeAllIn": "See all in {{name}}",
+    "allIn": "All in {{name}}"
+  },
+  "listing": { "call": "Call", "whatsapp": "WhatsApp", "elite": "ELITE" },
+  "locationModal": { "title": "Select Location" },
+  "account": {
+    "title": "Account Screen",
+    "login": "Log in",
+    "loginToYourAccount": "Log in to your account",
+    "blog": "Blog",
+    "helpAndSupport": "Help & Support",
+    "helpCenter": "Help center and legal terms",
+    "customerSupport": "Customer Support",
+    "getAssistance": "Get assistance from our support team",
+    "changeLanguageTitle": "العربية",
+    "changeLanguage": "Change language",
+    "settings": "Settings",
+    "logInBtn": "Log In",
+    "createNewAccount": "Create a new account"
+  },
+  "banner": { "title": "Everything you need", "subtitle": "in one place" }
 }
