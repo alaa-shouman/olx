@@ -10,12 +10,16 @@
       }
     }
   },
-  "search": { "placeholder": "عما تبحث؟" },
+  "search": {
+    "placeholder": "عما تبحث؟",
+    "placeholderLong": "ابحث عن المنتجات، العلامات التجارية والمزيد"
+  },
   "home": {
     "categories": "الفئات",
     "seeAll": "عرض الكل",
     "freshAds": "توصيات جديدة",
-    "location": "الموقع"
+    "location": "الموقع",
+    "allCategories": "جميع الفئات"
   },
   "filter": {
     "title": "الفلاتر",
@@ -25,7 +29,9 @@
     "allCountry": "كل البلد",
     "any": "أي",
     "yes": "نعم",
-    "apply": "أظهر النتائج"
+    "apply": "أظهر النتائج",
+    "min": "الحد الأدنى",
+    "max": "الحد الأقصى"
   },
   "searchScreen": {
     "filters": "فلاتر",
@@ -39,8 +45,14 @@
     "seeAllIn": "عرض الكل في {{name}}",
     "allIn": "الكل في {{name}}"
   },
-  "listing": { "call": "اتصال", "whatsapp": "واتساب", "elite": "مميز" },
-  "locationModal": { "title": "اختر الموقع" },
+  "listing": {
+    "call": "اتصال",
+    "whatsapp": "واتساب",
+    "elite": "مميز"
+  },
+  "locationModal": {
+    "title": "اختر الموقع"
+  },
   "account": {
     "title": "حسابي",
     "login": "تسجيل الدخول",
@@ -56,5 +68,20 @@
     "logInBtn": "دخول",
     "createNewAccount": "إنشاء حساب جديد"
   },
-  "banner": { "title": "كل ما تحتاجه", "subtitle": "في مكان واحد" }
+  "banner": {
+    "title": "كل ما تحتاجه",
+    "subtitle": "في مكان واحد"
+  },
+  "mockCategories": {
+    "vehicles": "المركبات",
+    "properties": "العقارات",
+    "electronics": "الإلكترونيات",
+    "jobs": "الوظائف",
+    "furniture": "الأثاث",
+    "mobiles": "الموبايلات",
+    "carsForSale": "سيارات للبيع",
+    "mobilePhones": "موبايلات",
+    "apartmentsForSale": "شقق للبيع",
+    "allCategories": "جميع الفئات"
+  }
 }

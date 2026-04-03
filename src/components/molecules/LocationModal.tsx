@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Modal, FlatList, TouchableOpacity, ActivityIndicator, I18nManager } from 'react-native';
+import { View, Text, StyleSheet, Modal, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { fetchLocations } from '../../services/ads';
 import { useTranslation } from 'react-i18next';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-interface LocationItem {
+export interface LocationItem {
     id: string;
     name: string;
+    name_l1: string;
     externalID: string;
 }
 
@@ -22,6 +23,7 @@ const LocationModal: React.FC<LocationModalProps> = ({ visible, onClose, onSelec
     const isArabic = i18n.language === 'ar';
     const [locations, setLocations] = useState<LocationItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const insets = useSafeAreaInsets();
 
     useEffect(() => {
         if (visible) {
@@ -41,12 +43,13 @@ const LocationModal: React.FC<LocationModalProps> = ({ visible, onClose, onSelec
             const hits = response.responses?.[0]?.hits?.hits || [];
             const mapped = hits.map((h: any) => ({
                 id: String(h._source.id),
-                name: isArabic ? (h._source.name_l1 || h._source.name) : h._source.name,
+                name: h._source.name || h._source.name_l1,
+                name_l1: h._source.name_l1 || h._source.name,
                 externalID: h._source.externalID || String(h._source.id),
             }));
 
             // Add "All Lebanon" option
-            setLocations([{ id: '1', name: isArabic ? 'كل لبنان' : 'All Lebanon', externalID: '0-1' }, ...mapped]);
+            setLocations([{ id: '1', name_l1: 'كل لبنان', name: 'All Lebanon', externalID: '0-1' }, ...mapped]);
         } catch (error) {
             console.log('Error fetching locations:', error);
         } finally {
@@ -55,8 +58,8 @@ const LocationModal: React.FC<LocationModalProps> = ({ visible, onClose, onSelec
     };
 
     return (
-        <Modal visible={visible} animationType="slide" transparent={false}>
-            <SafeAreaView style={styles.container}>
+        <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={onClose}>
+            <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
                 <View style={styles.header}>
                     <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
                         <Ionicons name="close" size={28} color="#212121" />
@@ -75,14 +78,14 @@ const LocationModal: React.FC<LocationModalProps> = ({ visible, onClose, onSelec
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
                             <TouchableOpacity style={styles.item} onPress={() => onSelect(item)}>
-                                <Text style={styles.itemText}>{item.name}</Text>
+                                <Text style={styles.itemText}>{isArabic ? item.name_l1 : item.name}</Text>
                                 <Ionicons name={isArabic ? "chevron-back" : "chevron-forward"} size={20} color="#E0E0E0" />
                             </TouchableOpacity>
                         )}
                         ItemSeparatorComponent={() => <View style={styles.separator} />}
                     />
                 )}
-            </SafeAreaView>
+            </View>
         </Modal>
     );
 };

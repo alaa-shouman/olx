@@ -36,8 +36,11 @@ const SearchScreen = ({ navigation, route }: any) => {
                 const parameters = source.parameters || [];
 
                 const title = isArabic ? (source.title_l1 || source.title) : source.title;
-                const locName = isArabic ? (source.location[2].name_l1 || source.location[2].name) : (source.location[2].name || source.location[2].name_l1);
-                console.log('locName :>> ', source.location[2].name);
+
+                const locArray = Array.isArray(source.location) ? source.location : [];
+                const locObj = locArray.length > 0 ? locArray[locArray.length - 1] : (source.location || {});
+                const locName = isArabic ? (locObj?.name_l1 || locObj?.name) : (locObj?.name || locObj?.name_l1 || locObj?.pathName);
+
                 return {
                     id: String(source.id),
                     title: title,

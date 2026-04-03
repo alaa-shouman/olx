@@ -24,13 +24,13 @@ interface CategorySection {
     loading: boolean;
 }
 
-const FALLBACK_CATEGORIES: CategoryData[] = [
-    { id: '1', name: 'Vehicles', icon: 'car-sport-outline' },
-    { id: '16', name: 'Properties', icon: 'business-outline' },
-    { id: '4', name: 'Electronics', icon: 'laptop-outline' },
-    { id: '7', name: 'Jobs', icon: 'briefcase-outline' },
-    { id: '6', name: 'Furniture', icon: 'bed-outline' },
-    { id: '402', name: 'Mobiles', icon: 'phone-portrait-outline' },
+const FALLBACK_CATEGORIES_KEYS: any[] = [
+    { id: '1', nameKey: 'mockCategories.vehicles', icon: 'car-sport-outline' },
+    { id: '16', nameKey: 'mockCategories.properties', icon: 'business-outline' },
+    { id: '4', nameKey: 'mockCategories.electronics', icon: 'laptop-outline' },
+    { id: '7', nameKey: 'mockCategories.jobs', icon: 'briefcase-outline' },
+    { id: '6', nameKey: 'mockCategories.furniture', icon: 'bed-outline' },
+    { id: '402', nameKey: 'mockCategories.mobiles', icon: 'phone-portrait-outline' },
 ];
 
 const mapCategoryIcon = (id: string | number): string => {
@@ -50,7 +50,7 @@ const HomeScreen = () => {
     const navigation = useNavigation<any>();
     const isArabic = i18n.language === 'ar';
 
-    const [categories, setCategories] = useState<CategoryData[]>(FALLBACK_CATEGORIES);
+    const [categories, setCategories] = useState<CategoryData[]>([]);
     const [sections, setSections] = useState<CategorySection[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -125,9 +125,14 @@ const HomeScreen = () => {
             }
 
             // 2. Fetch Ads for categories in parallel
+            const fallbackCategories = FALLBACK_CATEGORIES_KEYS.map(c => ({ id: c.id, name: t(c.nameKey), icon: c.icon }));
             const categoriesToFetch = (topCategories && topCategories.length > 0)
                 ? topCategories
-                : FALLBACK_CATEGORIES;
+                : fallbackCategories;
+            
+            if (!topCategories || topCategories.length === 0) {
+                setCategories(fallbackCategories);
+            }
 
             const language = i18n.language;
             const locationId = selectedLocation.externalID;

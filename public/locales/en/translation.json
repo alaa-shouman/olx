@@ -10,12 +10,16 @@
       }
     }
   },
-  "search": { "placeholder": "What are you looking for?" },
+  "search": {
+    "placeholder": "What are you looking for?",
+    "placeholderLong": "Search for products, brands and more"
+  },
   "home": {
     "categories": "Categories",
     "seeAll": "See all",
     "freshAds": "Fresh recommendations",
-    "location": "Location"
+    "location": "Location",
+    "allCategories": "All Categories"
   },
   "filter": {
     "title": "Filters",
@@ -25,7 +29,9 @@
     "allCountry": "All country",
     "any": "Any",
     "yes": "Yes",
-    "apply": "See Results"
+    "apply": "See Results",
+    "min": "Min",
+    "max": "Max"
   },
   "searchScreen": {
     "filters": "Filters",
@@ -39,8 +45,14 @@
     "seeAllIn": "See all in {{name}}",
     "allIn": "All in {{name}}"
   },
-  "listing": { "call": "Call", "whatsapp": "WhatsApp", "elite": "ELITE" },
-  "locationModal": { "title": "Select Location" },
+  "listing": {
+    "call": "Call",
+    "whatsapp": "WhatsApp",
+    "elite": "ELITE"
+  },
+  "locationModal": {
+    "title": "Select Location"
+  },
   "account": {
     "title": "Account Screen",
     "login": "Log in",
@@ -56,5 +68,20 @@
     "logInBtn": "Log In",
     "createNewAccount": "Create a new account"
   },
-  "banner": { "title": "Everything you need", "subtitle": "in one place" }
+  "banner": {
+    "title": "Everything you need",
+    "subtitle": "in one place"
+  },
+  "mockCategories": {
+    "vehicles": "Vehicles",
+    "properties": "Properties",
+    "electronics": "Electronics",
+    "jobs": "Jobs",
+    "furniture": "Furniture",
+    "mobiles": "Mobiles",
+    "carsForSale": "Cars for sale",
+    "mobilePhones": "Mobile Phones",
+    "apartmentsForSale": "Apartments for sale",
+    "allCategories": "All Categories"
+  }
 }

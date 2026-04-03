@@ -18,7 +18,7 @@ const SearchField: React.FC<SearchFieldProps> = ({ placeholder, onSearch, onPres
             <Ionicons name="search" size={20} color="#757575" style={styles.icon} />
             <TextInput
                 style={styles.input}
-                placeholder={placeholder || t('home.searchPlaceholder')}
+                placeholder={placeholder || t('search.placeholderLong', 'Search for products, brands and more')}
                 placeholderTextColor="#757575"
                 onChangeText={onSearch}
                 onFocus={onPress ? () => onPress() : undefined} // Also trigger if user taps directly into input

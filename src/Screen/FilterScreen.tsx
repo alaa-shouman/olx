@@ -31,10 +31,10 @@ const FilterScreen = ({ navigation, route }: any) => {
     // Mock category details mapped from ID (In real app, comes from categories API)
     const getCategoryDetails = () => {
         switch (categoryId) {
-            case '23': return { name: 'Cars for sale', icon: 'car-sport' };
-            case '402': return { name: 'Mobile Phones', icon: 'phone-portrait' };
-            case '1426': return { name: 'Apartments for sale', icon: 'business' };
-            default: return { name: 'All Categories', icon: 'grid' };
+            case '23': return { name: t('mockCategories.carsForSale', 'Cars for sale'), icon: 'car-sport' };
+            case '402': return { name: t('mockCategories.mobilePhones', 'Mobile Phones'), icon: 'phone-portrait' };
+            case '1426': return { name: t('mockCategories.apartmentsForSale', 'Apartments for sale'), icon: 'business' };
+            default: return { name: t('mockCategories.allCategories', 'All Categories'), icon: 'grid' };
         }
     };
     const catDetails = getCategoryDetails();
@@ -92,7 +92,7 @@ const FilterScreen = ({ navigation, route }: any) => {
                                             <View style={styles.inputContainer}>
                                                 <TextInput
                                                     style={styles.input}
-                                                    placeholder="Min"
+                                                    placeholder={t('filter.min', 'Min')}
                                                     keyboardType="numeric"
                                                     placeholderTextColor="#9E9E9E"
                                                 />
@@ -100,7 +100,7 @@ const FilterScreen = ({ navigation, route }: any) => {
                                             <View style={styles.inputContainer}>
                                                 <TextInput
                                                     style={styles.input}
-                                                    placeholder="Max"
+                                                    placeholder={t('filter.max', 'Max')}
                                                     keyboardType="numeric"
                                                     placeholderTextColor="#9E9E9E"
                                                 />
