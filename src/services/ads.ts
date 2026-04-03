@@ -107,7 +107,7 @@ export const fetchLocations = async (
 ): Promise<FetchLocationsResponse> => {
   try {
     const {
-      hierarchyExternalID = '1-30',
+      hierarchyExternalID,
       level = 2,
       language = 'en',
       from = 0,
@@ -120,16 +120,19 @@ export const fetchLocations = async (
         : 'olx-lb-production-locations-en';
     const header = JSON.stringify({ index: indexName });
 
+    const mustConditions: any[] = [{ term: { level: level } }];
+
+    if (hierarchyExternalID) {
+      mustConditions.push({ term: { 'hierarchy.externalID': hierarchyExternalID } });
+    }
+
     const query = JSON.stringify({
       from,
       size,
       track_total_hits: false,
       query: {
         bool: {
-          must: [
-            { term: { 'hierarchy.externalID': hierarchyExternalID } },
-            { term: { level: level } },
-          ],
+          must: mustConditions,
         },
       },
       sort: [{ name: { order: 'asc' } }],

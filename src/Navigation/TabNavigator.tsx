@@ -11,7 +11,7 @@ import MyAdsScreen from '../Screen/Tabs/MyAdsScreen';
 import AccountScreen from '../Screen/Tabs/AccountScreen';
 import SearchScreen from '../Screen/SearchScreen';
 import FilterScreen from '../Screen/FilterScreen';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 export type TabParamList = {
     Home: undefined;
@@ -22,7 +22,7 @@ export type TabParamList = {
 };
 
 const Tab = createBottomTabNavigator<TabParamList>();
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
 const HomeStack = () => (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
