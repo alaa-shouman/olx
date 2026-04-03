@@ -36,8 +36,8 @@ const SearchScreen = ({ navigation, route }: any) => {
                 const parameters = source.parameters || [];
 
                 const title = isArabic ? (source.title_l1 || source.title) : source.title;
-                const locName = isArabic ? (source.location?.name_l1 || source.location?.name) : (source.location?.name || source.location?.pathName);
-
+                const locName = isArabic ? (source.location[2].name_l1 || source.location[2].name) : (source.location[2].name || source.location[2].name_l1);
+console.log('locName :>> ', source.location[2].name);
                 return {
                     id: String(source.id),
                     title: title,
