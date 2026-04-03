@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, I18nManager, Platform } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const { width } = Dimensions.get('window');
@@ -44,8 +44,8 @@ const ListingCard: React.FC<ListingCardProps> = ({ item, onPress, onFavoritePres
             </View>
 
             <View style={styles.detailsContainer}>
-                <Text style={styles.price}>{item.currency} {item.price}</Text>
-                <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
+                <Text style={[styles.price, { textAlign: 'left', alignSelf: 'flex-start' }]} numberOfLines={1}>{item.currency} {item.price}</Text>
+                <Text style={[styles.title, { textAlign: 'left', alignSelf: 'flex-start' }]} numberOfLines={1}>{item.title}</Text>
 
                 {item.meta && item.meta.length > 0 ? (
                     <View style={styles.metaRow}>
@@ -59,7 +59,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ item, onPress, onFavoritePres
                 ) : null}
 
                 <View style={styles.footerRow}>
-                    <Text style={styles.locationText} numberOfLines={1}>{item.location}</Text>
+                    <Text style={[styles.locationText, { textAlign: 'left' }]} numberOfLines={1}>{item.location}</Text>
                     <Text style={styles.timeText}>{item.timestamp}</Text>
                 </View>
             </View>

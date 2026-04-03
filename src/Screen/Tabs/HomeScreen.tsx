@@ -120,7 +120,7 @@ const HomeScreen = () => {
                 .slice(0, 6)
                 .map((c: any) => ({
                     id: String(c.id),
-                    name: isArabic ? (c.name_l1 || c.name) : c.name,
+                    name: c.name, // The API returns the localized name in 'name' based on Accept-Language
                     icon: mapCategoryIcon(c.id),
                     _raw: c
                 }));

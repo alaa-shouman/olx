@@ -8,7 +8,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export interface LocationItem {
     id: string;
     name: string;
-    name_l1: string;
     externalID: string;
 }
 
@@ -43,13 +42,12 @@ const LocationModal: React.FC<LocationModalProps> = ({ visible, onClose, onSelec
             const hits = response.responses?.[0]?.hits?.hits || [];
             const mapped = hits.map((h: any) => ({
                 id: String(h._source.id),
-                name: h._source.name || h._source.name_l1,
-                name_l1: h._source.name_l1 || h._source.name,
+                name: h._source.name,
                 externalID: h._source.externalID || String(h._source.id),
             }));
 
             // Add "All Lebanon" option
-            setLocations([{ id: '1', name_l1: 'كل لبنان', name: 'All Lebanon', externalID: '0-1' }, ...mapped]);
+            setLocations([{ id: '1', name: isArabic ? 'كل لبنان' : 'All Lebanon', externalID: '0-1' }, ...mapped]);
         } catch (error) {
             console.log('Error fetching locations:', error);
         } finally {
@@ -78,7 +76,7 @@ const LocationModal: React.FC<LocationModalProps> = ({ visible, onClose, onSelec
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
                             <TouchableOpacity style={styles.item} onPress={() => onSelect(item)}>
-                                <Text style={styles.itemText}>{isArabic ? item.name_l1 : item.name}</Text>
+                                <Text style={styles.itemText}>{item.name}</Text>
                                 <Ionicons name={isArabic ? "chevron-back" : "chevron-forward"} size={20} color="#E0E0E0" />
                             </TouchableOpacity>
                         )}

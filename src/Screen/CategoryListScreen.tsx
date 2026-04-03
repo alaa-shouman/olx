@@ -56,13 +56,13 @@ const CategoryListScreen = ({ navigation, route }: any) => {
         } else {
             navigation.navigate("SearchScreen", {
                 categoryId: String(category.id),
-                categoryName: isArabic ? (category.name_l1 || category.name) : category.name
+                categoryName: category.name
             });
         }
     };
 
     const parentName = parentCategory
-        ? (isArabic ? (parentCategory.name_l1 || parentCategory.name) : parentCategory.name)
+        ? parentCategory.name
         : t("home.allCategories", "All Categories");
 
     return (
@@ -97,7 +97,7 @@ const CategoryListScreen = ({ navigation, route }: any) => {
                         </TouchableOpacity>
                     )}
                     renderItem={({ item }) => {
-                        const name = isArabic ? (item.name_l1 || item.name) : item.name;
+                        const name = item.name; // The API returns the localized name in 'name' based on Accept-Language
                         const hasChildren = item.children && item.children.length > 0;
 
                         return (

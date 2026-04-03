@@ -52,8 +52,8 @@ const SearchListingCard: React.FC<SearchListingCardProps> = ({ item, onPress, on
             </View>
 
             <View style={styles.detailsContainer}>
-                <Text style={styles.price}>{item.currency} {item.price}</Text>
-                <Text style={styles.title} numberOfLines={2}>{item.title}</Text>
+                <Text style={[styles.price, { textAlign: 'left', alignSelf: 'flex-start' }]} numberOfLines={1}>{item.currency} {item.price}</Text>
+                <Text style={[styles.title, { textAlign: 'left', alignSelf: 'flex-start' }]} numberOfLines={2}>{item.title}</Text>
 
                 {item.meta && item.meta.length > 0 ? (
                     <View style={styles.metaRow}>
@@ -66,9 +66,9 @@ const SearchListingCard: React.FC<SearchListingCardProps> = ({ item, onPress, on
                     </View>
                 ) : null}
 
-                <View style={styles.locationTimeRow}>
+                <View style={[styles.locationTimeRow]}>
                     <Ionicons name="location-outline" size={14} color="#757575" />
-                    <Text style={styles.locationText} numberOfLines={1}>{item.location}</Text>
+                    <Text style={[styles.locationText, { textAlign: 'left' }]} numberOfLines={1}>{item.location}</Text>
                     <Text style={styles.timeText}>{item.timestamp}</Text>
                 </View>
             </View>
