@@ -69,7 +69,7 @@ const CategoryListScreen = ({ navigation, route }: any) => {
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-                    <Ionicons name={isArabic ? "chevron-forward" : "chevron-back"} size={28} color="#212121" />
+                    <Ionicons name={isArabic ? "arrow-forward" : "arrow-back"} size={28} color="#212121" />
                 </TouchableOpacity>
                 <Text style={styles.title}>{parentName}</Text>
                 <View style={{ width: 40 }} />

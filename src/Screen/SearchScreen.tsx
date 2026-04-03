@@ -50,7 +50,7 @@ const SearchScreen = ({ navigation, route }: any) => {
                     location: locName || '',
                     timestamp: new Date(source.created_at || Date.now()).toLocaleDateString(),
                     isElite: index === 0, // Mocking first item as Elite for UI demo
-                    meta: extractAdMeta(parameters)
+                    meta: extractAdMeta(parameters, isArabic)
                 };
             }));
         } catch (e) {

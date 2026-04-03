@@ -64,27 +64,32 @@ const HomeScreen = () => {
     });
 
     const formatAd = (h: any): ListingData => {
-        const title = isArabic ? (h._source.title_l1 || h._source.title) : h._source.title;
-        const locName = isArabic ? (h._source.location?.name_l1 || h._source.location?.name) : (h._source.location?.name || h._source.location?.pathName);
+        const source = h._source;
+        const title = isArabic ? (source.title_l1 || source.title) : source.title;
 
-        const extraFields = h._source.formattedExtraFields || [];
+        // Safely parse location
+        const locArray = Array.isArray(source.location) ? source.location : [];
+        const locObj = locArray.length > 0 ? locArray[locArray.length - 1] : (source.location || {});
+        const locName = isArabic ? (locObj?.name_l1 || locObj?.name) : (locObj?.name || locObj?.name_l1 || locObj?.pathName);
+
+        const extraFields = source.formattedExtraFields || [];
         const priceField = extraFields.find((f: any) => f.attribute === 'price' || f.name === 'Price') || {};
         let price = isArabic ? (priceField.formattedValue_l1 || priceField.formattedValue) : (priceField.formattedValue || priceField.formattedValue_l1);
-        
+
         if (!price) {
-            price = h._source.extraFields?.price?.toLocaleString() || h._source.price?.toString() || '0';
+            price = source.extraFields?.price?.toLocaleString() || source.price?.toString() || '0';
         }
 
         return {
-            id: String(h._source.id),
+            id: String(source.id),
             title: title,
             price: price,
-            currency: h._source.price?.currency?.isoCode || 'USD',
-            imageUrl: h._source.mainImage?.url || h._source.images?.[0]?.url || 'https://via.placeholder.com/300x200.png?text=No+Image',
+            currency: source.price?.currency?.isoCode || 'USD',
+            imageUrl: source.mainImage?.url || source.images?.[0]?.url || 'https://via.placeholder.com/300x200.png?text=No+Image',
             location: locName || '',
-            timestamp: new Date(h._source.created_at || Date.now()).toLocaleDateString(),
+            timestamp: new Date(source.created_at || Date.now()).toLocaleDateString(),
             isFavorite: false,
-            meta: extractAdMeta(h._source.parameters || [])
+            meta: extractAdMeta(source.parameters || [], isArabic)
         };
     };
 
@@ -109,9 +114,9 @@ const HomeScreen = () => {
         try {
             // 1. Fetch Categories
             const catsResponse: any = await getCategories();
-            const categoriesArray = Array.isArray(catsResponse) ? catsResponse : (catsResponse.data || []);
-            const topCategories = categoriesArray
-                .filter((c: any) => !c.parent_id)
+            const categoriesArray = Array.isArray(catsResponse) ? catsResponse : (catsResponse?.data || []);
+            const allCats = categoriesArray.filter((c: any) => !c.parent_id);
+            const topCategories = allCats
                 .slice(0, 6)
                 .map((c: any) => ({
                     id: String(c.id),
@@ -129,7 +134,7 @@ const HomeScreen = () => {
             const categoriesToFetch = (topCategories && topCategories.length > 0)
                 ? topCategories
                 : fallbackCategories;
-            
+
             if (!topCategories || topCategories.length === 0) {
                 setCategories(fallbackCategories);
             }

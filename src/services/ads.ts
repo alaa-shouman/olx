@@ -23,10 +23,9 @@ export const fetchAds = async (
     } = data;
 
     // Index selection based on language
-    const indexName =
-      language === 'ar'
-        ? 'olx-lb-production-ads-ar'
-        : 'olx-lb-production-ads-en';
+    // Always use the 'en' index for ads as it contains both localized properties (name_l1, title_l1)
+    // and the 'ar' index for ads returns 404 on the elasticsearch cluster.
+    const indexName = 'olx-lb-production-ads-en';
     const header = JSON.stringify({ index: indexName });
 
     // Must array contains the guaranteed query terms

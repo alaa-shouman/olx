@@ -1,4 +1,5 @@
-import axios from "axios";
+import axios from 'axios';
+import i18n from '../../i18n';
 
 let isRefreshing = false;
 let failedQueue: Array<{
@@ -21,18 +22,19 @@ export const createAxiosInstance = (baseURL: string) => {
   const instance = axios.create({
     baseURL,
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 
   instance.interceptors.request.use(
-    (config) => {
+    config => {
+      config.headers['Accept-Language'] = i18n?.language === 'ar' ? 'ar' : 'en';
+      config.headers['X-Request-ID'] = `req_${Date.now()}_${Math.floor(
+        Math.random() * 1000,
+      )}`;
+      config.headers['X-Request-Time'] = new Date().toISOString();
 
-
-      config.headers["X-Request-ID"] = `req_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-      config.headers["X-Request-Time"] = new Date().toISOString();
-
-      console.log("Full Request Details:", {
+      console.log('Full Request Details:', {
         method: config.method?.toUpperCase(),
         url: `${config.baseURL}${config.url}`,
         headers: config.headers,
@@ -42,15 +44,15 @@ export const createAxiosInstance = (baseURL: string) => {
 
       return config;
     },
-    (error) => {
+    error => {
       // console.error("Request Error Interceptor:", error);
       return Promise.reject(error);
-    }
+    },
   );
 
   instance.interceptors.response.use(
-    (response) => {
-      console.log("Response Success:", {
+    response => {
+      console.log('Response Success:', {
         status: response.status,
         statusText: response.statusText,
         url: response.config.url,
@@ -62,9 +64,9 @@ export const createAxiosInstance = (baseURL: string) => {
       });
       return response;
     },
-    async (error) => {
+    async error => {
       const originalRequest = error.config;
-       console.error("Response Error:", {
+      console.error('Response Error:', {
         url: error.config?.url,
         method: error.config?.method?.toUpperCase(),
         status: error.response?.status,
@@ -75,14 +77,14 @@ export const createAxiosInstance = (baseURL: string) => {
         requestParams: error.config?.params,
         message: error.message,
       });
-      
+
       // Fix: Safely access error.response.data
-      const errorMessage = error.response?.data?.error 
-        ? JSON.stringify(error.response.data.error) 
-        : error.message || "An error occurred";
-    
+      const errorMessage = error.response?.data?.error
+        ? JSON.stringify(error.response.data.error)
+        : error.message || 'An error occurred';
+
       return Promise.reject(error);
-    }
+    },
   );
 
   return instance;
