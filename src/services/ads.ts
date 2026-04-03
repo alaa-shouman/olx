@@ -36,7 +36,7 @@ export const fetchAds = async (
     if (dynamicFilters) {
       Object.keys(dynamicFilters).forEach(key => {
         const val = dynamicFilters[key];
-        const esKey = key === 'price' ? 'price.value' : `extraFields.${key}`;
+        const esKey = `extraFields.${key}`;
 
         if (typeof val === 'object' && !Array.isArray(val)) {
           // Range (gte, lte)
@@ -73,7 +73,7 @@ export const fetchAds = async (
       const rangeCondition: any = {};
       if (priceMin !== undefined) rangeCondition.gte = priceMin;
       if (priceMax !== undefined) rangeCondition.lte = priceMax;
-      filterConditions.push({ range: { 'price.value': rangeCondition } });
+      filterConditions.push({ range: { 'extraFields.price': rangeCondition } });
     }
 
     const query = JSON.stringify({

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, ActivityIndicator, I18nManager, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, ActivityIndicator, I18nManager, KeyboardAvoidingView, Platform, Modal, FlatList } from 'react-native';
 import { getCategoryFields, mapCategoryFieldsToFilters } from '../services/categories';
 import { DynamicFilter } from '../validation';
 import { useTranslation } from 'react-i18next';
@@ -32,6 +32,7 @@ const FilterScreen = ({ navigation, route }: any) => {
         appliedLocationId ? { id: appliedLocationId, name: t('filter.selectedLocation', 'Custom Location'), externalID: appliedLocationId } : null
     );
     const [isLocationModalVisible, setLocationModalVisible] = useState(false);
+    const [activeFilterModal, setActiveFilterModal] = useState<DynamicFilter | null>(null);
 
     useEffect(() => {
         const fetchFilters = async () => {
@@ -125,7 +126,7 @@ const FilterScreen = ({ navigation, route }: any) => {
     const catDetails = getCategoryDetails();
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
@@ -205,19 +206,25 @@ const FilterScreen = ({ navigation, route }: any) => {
 
                                 // If many choices, render as list item (e.g., Brand, Payment Options)
                                 if (filter.choices && filter.choices.length > 5) {
-                                    // For a real app, this opens another modal list. Here we just show the first selected or Any.
+                                    const selectedCount = currentSelection.length;
                                     const selectedChoice = filter.choices.find(c => currentSelection.includes(c.value));
 
+                                    let displayValue = t('filter.any', 'Any');
+                                    if (selectedCount === 1 && selectedChoice) {
+                                        displayValue = selectedChoice.label;
+                                    } else if (selectedCount > 1) {
+                                        displayValue = `${selectedCount} ${t('filter.selected', 'Selected')}`;
+                                    }
+
                                     return (
-                                        <TouchableOpacity key={filter.id} style={styles.listItem} onPress={() => {
-                                            // Mock simply toggling the first item for now without complex modals
-                                            if (filter.choices && filter.choices.length > 0) {
-                                                toggleMultipleChoice(filter.attribute, filter.choices[0].value);
-                                            }
-                                        }}>
+                                        <TouchableOpacity
+                                            key={filter.id}
+                                            style={styles.listItem}
+                                            onPress={() => setActiveFilterModal(filter)}
+                                        >
                                             <Text style={styles.listLabel}>{filter.name}</Text>
                                             <View style={styles.listAction}>
-                                                <Text style={styles.listValue}>{selectedChoice ? selectedChoice.label : t('filter.any', 'Any')}</Text>
+                                                <Text style={styles.listValue}>{displayValue}</Text>
                                                 <Ionicons name={isArabic ? "chevron-back" : "chevron-forward"} size={20} color="#757575" />
                                             </View>
                                         </TouchableOpacity>
@@ -295,6 +302,50 @@ const FilterScreen = ({ navigation, route }: any) => {
                     setLocationModalVisible(false);
                 }}
             />
+
+            {/* Generic Multiple Choice Modal */}
+            <Modal
+                visible={!!activeFilterModal}
+                animationType="slide"
+                transparent={false}
+                onRequestClose={() => setActiveFilterModal(null)}
+            >
+                <SafeAreaView style={styles.container}>
+                    <View style={styles.header}>
+                        <TouchableOpacity onPress={() => setActiveFilterModal(null)} style={styles.closeButton}>
+                            <Ionicons name="close" size={28} color="#212121" />
+                        </TouchableOpacity>
+                        <Text style={styles.title}>{activeFilterModal?.name}</Text>
+                        <View style={{ width: 40 }} />
+                    </View>
+                    <FlatList
+                        data={activeFilterModal?.choices || []}
+                        keyExtractor={(item) => item.id.toString()}
+                        renderItem={({ item }) => {
+                            const isSelected = !!(activeFilterModal &&
+                                Array.isArray(selectedFilters[activeFilterModal.attribute]) &&
+                                selectedFilters[activeFilterModal.attribute].includes(item.value));
+
+                            return (
+                                <TouchableOpacity
+                                    style={styles.listItem}
+                                    onPress={() => activeFilterModal && toggleMultipleChoice(activeFilterModal.attribute, item.value)}
+                                >
+                                    <Text style={[styles.listLabel, isSelected && { color: '#00BCD4', fontWeight: 'bold' }]}>
+                                        {item.label}
+                                    </Text>
+                                    {isSelected && <Ionicons name="checkmark" size={24} color="#00BCD4" />}
+                                </TouchableOpacity>
+                            );
+                        }}
+                    />
+                    <View style={styles.footer}>
+                        <TouchableOpacity style={styles.applyButton} onPress={() => setActiveFilterModal(null)}>
+                            <Text style={styles.applyText}>{t('filter.done', 'Done')}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </SafeAreaView>
+            </Modal>
         </SafeAreaView>
     );
 };
