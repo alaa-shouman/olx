@@ -9,6 +9,9 @@ import ChatsScreen from '../Screen/Tabs/ChatsScreen';
 import SellScreen from '../Screen/Tabs/SellScreen';
 import MyAdsScreen from '../Screen/Tabs/MyAdsScreen';
 import AccountScreen from '../Screen/Tabs/AccountScreen';
+import SearchScreen from '../Screen/SearchScreen';
+import FilterScreen from '../Screen/FilterScreen';
+import { createStackNavigator } from '@react-navigation/stack';
 
 export type TabParamList = {
     Home: undefined;
@@ -19,6 +22,15 @@ export type TabParamList = {
 };
 
 const Tab = createBottomTabNavigator<TabParamList>();
+const Stack = createStackNavigator();
+
+const HomeStack = () => (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="HomeScreen" component={HomeScreen} />
+        <Stack.Screen name="SearchScreen" component={SearchScreen} />
+        <Stack.Screen name="FilterScreen" component={FilterScreen} options={{ presentation: 'modal' }} />
+    </Stack.Navigator>
+);
 
 // --- Theme & Configuration ---
 const THEME = {
@@ -48,7 +60,7 @@ interface TabConfig {
 
 // Highly generic and reusable tab configuration
 const TABS_CONFIG: TabConfig[] = [
-    { name: 'Home', component: HomeScreen, labelKey: 'home', iconOutline: 'home-outline', iconSolid: 'home' },
+    { name: 'Home', component: HomeStack, labelKey: 'home', iconOutline: 'home-outline', iconSolid: 'home' },
     { name: 'Chats', component: ChatsScreen, labelKey: 'chats', iconOutline: 'chatbubble-outline', iconSolid: 'chatbubble' },
     { name: 'Sell', component: SellScreen, labelKey: 'sell', iconOutline: 'add', iconSolid: 'add', isAction: true },
     { name: 'MyAds', component: MyAdsScreen, labelKey: 'myAds', iconOutline: 'list-outline', iconSolid: 'list' },
@@ -77,7 +89,7 @@ const TabNavigator = () => {
     };
 
     const renderLabel = (tab: TabConfig, focused: boolean) => {
-       // if (tab.isAction) return null; // Center action button has no text label
+        if (tab.isAction) return null; // Center action button has no text label
 
         return (
             <Text

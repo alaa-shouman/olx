@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity, Text, FlatList, ActivityIndicator } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity, Text, FlatList, ActivityIndicator, I18nManager } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { fetchAds } from '../services/ads';
-import ListingCard, { ListingData } from '../components/molecules/ListingCard';
+import SearchListingCard, { SearchListingData } from '../components/molecules/SearchListingCard';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const SearchScreen = ({ navigation, route }: any) => {
     const { t, i18n } = useTranslation();
@@ -12,7 +13,7 @@ const SearchScreen = ({ navigation, route }: any) => {
     const initialCategory = route.params?.categoryId || null;
 
     const [searchQuery, setSearchQuery] = useState(initialQuery);
-    const [ads, setAds] = useState<ListingData[]>([]);
+    const [ads, setAds] = useState<SearchListingData[]>([]);
     const [loading, setLoading] = useState(false);
     const [totalHits, setTotalHits] = useState(0);
 
@@ -28,16 +29,35 @@ const SearchScreen = ({ navigation, route }: any) => {
             const hits = data.responses?.[0]?.hits?.hits || [];
             setTotalHits(data.responses?.[0]?.hits?.total?.value || 0);
 
-            setAds(hits.map((h: any) => ({
-                id: String(h._source.id),
-                title: h._source.title,
-                price: h._source.price?.value?.toLocaleString() || '0',
-                currency: h._source.price?.currency?.isoCode || '$',
-                imageUrl: h._source.mainImage?.url,
-                location: h._source.location?.name || '',
-                timestamp: new Date(h._source.created_at || Date.now()).toLocaleDateString(),
-                meta: {}
-            })));
+            setAds(hits.map((h: any, index: number) => {
+                const source = h._source;
+                const parameters = source.parameters || [];
+                
+                // Helper to extract dynamic field parameters safely
+                const getParam = (key: string) => {
+                    const param = parameters.find((p: any) => p.key === key);
+                    return param ? param.value : undefined;
+                };
+
+                return {
+                    id: String(source.id),
+                    title: source.title,
+                    price: source.price?.value?.display || (source.price?.value?.amount ? source.price.value.amount.toLocaleString() : '0'),
+                    currency: source.price?.currency?.isoCode || 'USD',
+                    imageUrl: source.mainImage?.url || source.images?.[0]?.url,
+                    location: source.location?.name || source.location?.pathName || '',
+                    timestamp: new Date(source.created_at || Date.now()).toLocaleDateString(),
+                    isElite: index === 0, // Mocking first item as Elite for UI demo
+                    meta: {
+                        year: getParam('year'),
+                        mileage: getParam('mileage'),
+                        fuel: getParam('fuel'),
+                        beds: getParam('rooms'),
+                        baths: getParam('bathrooms'),
+                        area: getParam('area'),
+                    }
+                };
+            }));
         } catch (e) {
             console.log(e);
         } finally {
@@ -54,40 +74,54 @@ const SearchScreen = ({ navigation, route }: any) => {
             {/* Header section */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Text style={styles.iconText}>{'<'}</Text>
+                    <Ionicons name={isArabic ? "arrow-forward" : "arrow-back"} size={24} color="#3B3B3B" />
                 </TouchableOpacity>
                 <View style={styles.searchContainer}>
-                    <Text style={styles.searchIcon}>🔍</Text>
+                    <Ionicons name="search" size={20} color="#757575" style={styles.searchIcon} />
                     <TextInput
                         style={styles.searchInput}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                         onSubmitEditing={loadFilteredAds}
                         placeholder={t('search.placeholder', 'What are you looking for?')}
+                        placeholderTextColor="#757575"
+                        textAlign={isArabic ? 'right' : 'left'}
                     />
                 </View>
             </View>
 
             {/* Sub Filter Row */}
-            <View style={styles.filterRow}>
-                <TouchableOpacity style={styles.pillActive} onPress={() => navigation.navigate('FilterScreen', { categoryId: initialCategory })}>
-                    <Text style={styles.pillTextActive}>Filters</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.pill}>
-                    <Text style={styles.pillText}>All country ⌄</Text>
-                </TouchableOpacity>
-                {initialCategory && (
-                    <TouchableOpacity style={styles.pill}>
-                        <Text style={styles.pillText}>Cars For Sale</Text>
-                    </TouchableOpacity>
-                )}
+            <View style={styles.filterRowContainer}>
+                <FlatList 
+                    horizontal 
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.filterRow}
+                    data={[
+                        { id: 'filter', label: 'Filters', isIcon: true, icon: 'options-outline', active: true },
+                        { id: 'location', label: 'All country', isIcon: true, icon: 'location-outline' },
+                        { id: 'category', label: initialCategory === '23' ? 'Cars for sale' : 'Category' },
+                    ]}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity 
+                            style={[styles.pill, item.active && styles.pillActive]} 
+                            onPress={() => item.id === 'filter' ? navigation.navigate('FilterScreen', { categoryId: initialCategory }) : null}
+                        >
+                            {item.isIcon && <Ionicons name={item.icon!} size={16} color={item.active ? '#00BCD4' : '#3B3B3B'} style={styles.pillIcon} />}
+                            <Text style={[styles.pillText, item.active && styles.pillTextActive]}>
+                                {item.label} {item.id === 'location' ? '⌄' : ''}
+                            </Text>
+                        </TouchableOpacity>
+                    )}
+                />
             </View>
 
             {/* Results Count & Sorting */}
             <View style={styles.resultsInfoRow}>
                 <Text style={styles.resultsText}>Showing: {totalHits} Results</Text>
-                <TouchableOpacity>
-                    <Text style={styles.sortText}>Sort By ↑↓</Text>
+                <TouchableOpacity style={styles.sortToggle}>
+                    <Text style={styles.sortText}>Sort By</Text>
+                    <Ionicons name="swap-vertical" size={16} color="#00BCD4" style={{marginStart: 4}} />
                 </TouchableOpacity>
             </View>
 
@@ -98,10 +132,28 @@ const SearchScreen = ({ navigation, route }: any) => {
                     data={ads}
                     keyExtractor={item => item.id}
                     renderItem={({ item }) => (
-                        // Re-using your generic ListingCard component here
-                        <ListingCard item={item} onPress={() => { }} onFavoritePress={() => { }} />
+                        <SearchListingCard 
+                            item={item} 
+                            onPress={() => {}} 
+                            onFavoritePress={() => {}} 
+                            onCallPress={() => {}}
+                            onWhatsAppPress={() => {}}
+                        />
                     )}
                     contentContainerStyle={styles.listPadding}
+                    ListHeaderComponent={() => {
+                        if (ads.length > 0 && ads[0].isElite) {
+                            return (
+                                <View style={styles.eliteHeaderSection}>
+                                    <Text style={styles.eliteSectionTitle}>Elite Ads</Text>
+                                    <TouchableOpacity>
+                                        <Text style={styles.viewMoreText}>View more</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            );
+                        }
+                        return null;
+                    }}
                 />
             )}
         </SafeAreaView>
@@ -110,21 +162,117 @@ const SearchScreen = ({ navigation, route }: any) => {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#FFFFFF' },
-    header: { flexDirection: 'row', alignItems: 'center', padding: 16, backgroundColor: '#FFF', borderBottomWidth: 1, borderColor: '#EAEAEA' },
-    backButton: { marginEnd: 12 },
-    iconText: { fontSize: 24, color: '#333' },
-    searchContainer: { flex: 1, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#CCC', borderRadius: 4, paddingHorizontal: 10, height: 40 },
-    searchIcon: { marginEnd: 8, fontSize: 16 },
-    searchInput: { flex: 1, height: '100%', color: '#333' },
-    filterRow: { flexDirection: 'row', paddingHorizontal: 16, paddingVertical: 12 },
-    pill: { borderWidth: 1, borderColor: '#CCC', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6, marginEnd: 8 },
-    pillActive: { backgroundColor: '#E0F7FA', borderWidth: 1, borderColor: '#00BCD4', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6, marginEnd: 8 },
-    pillText: { color: '#333', fontSize: 13 },
-    pillTextActive: { color: '#00BCD4', fontSize: 13, fontWeight: 'bold' },
-    resultsInfoRow: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 8 },
-    resultsText: { fontSize: 13, color: '#555', fontWeight: 'bold' },
-    sortText: { fontSize: 13, color: '#00BCD4' },
-    listPadding: { padding: 16 }
+    header: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        paddingHorizontal: 16, 
+        paddingVertical: 12,
+        backgroundColor: '#FFFFFF',
+    },
+    backButton: { 
+        marginEnd: 12,
+        padding: 4,
+    },
+    searchContainer: { 
+        flex: 1, 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        borderWidth: 1, 
+        borderColor: '#E0E0E0', 
+        borderRadius: 8, 
+        paddingHorizontal: 12, 
+        height: 44,
+        backgroundColor: '#FFFFFF',
+    },
+    searchIcon: { 
+        marginEnd: 8 
+    },
+    searchInput: { 
+        flex: 1, 
+        height: '100%', 
+        color: '#212121',
+        fontSize: 14,
+        paddingVertical: 0,
+    },
+    filterRowContainer: {
+        borderBottomWidth: 1,
+        borderColor: '#EEEEEE',
+    },
+    filterRow: { 
+        paddingHorizontal: 16, 
+        paddingVertical: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    pill: { 
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1, 
+        borderColor: '#E0E0E0', 
+        borderRadius: 20, 
+        paddingHorizontal: 16, 
+        paddingVertical: 8, 
+        marginEnd: 8,
+        backgroundColor: '#FFFFFF',
+    },
+    pillActive: { 
+        backgroundColor: '#E0F7FA', 
+        borderColor: '#00BCD4', 
+    },
+    pillIcon: {
+        marginEnd: 6,
+    },
+    pillText: { 
+        color: '#3B3B3B', 
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    pillTextActive: { 
+        color: '#00BCD4', 
+        fontWeight: 'bold',
+    },
+    resultsInfoRow: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        paddingHorizontal: 16, 
+        paddingVertical: 16,
+    },
+    resultsText: { 
+        fontSize: 14, 
+        color: '#212121', 
+        fontWeight: 'bold',
+    },
+    sortToggle: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    sortText: { 
+        fontSize: 14, 
+        color: '#00BCD4',
+        fontWeight: '600',
+    },
+    eliteHeaderSection: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12,
+        marginTop: 4,
+    },
+    eliteSectionTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#212121',
+    },
+    viewMoreText: {
+        fontSize: 14,
+        color: '#00BCD4',
+        fontWeight: '600',
+    },
+    listPadding: { 
+        paddingHorizontal: 16,
+        paddingBottom: 24,
+    }
 });
 
 export default SearchScreen;

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, ScrollView, StatusBar, ActivityIndicator, Text } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import AppBar from '../../components/atoms/AppBar';
 import SearchField from '../../components/atoms/SearchField';
@@ -10,7 +10,7 @@ import SectionHeader from '../../components/atoms/SectionHeader';
 import CategoryItem, { CategoryData } from '../../components/molecules/CategoryItem';
 import ListingCard, { ListingData } from '../../components/molecules/ListingCard';
 import ImageBanner from '../../components/organisms/ImageBanner';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { getCategories } from '../../services/categories';
 import { fetchAds, fetchLocations } from '../../services/ads';
 
@@ -35,223 +35,124 @@ const mapCategoryIcon = (id: string | number): string => {
     return iconMap[String(id)] || 'grid-outline';
 };
 
-const LISTINGS: ListingData[] = [
-    {
-        id: '1',
-        title: 'Luxury Apartment in Beirut',
-        price: '150,000',
-        currency: '$',
-        imageUrl: 'https://via.placeholder.com/300x200.png?text=Apartment',
-        location: 'Achrafieh, Beirut',
-        timestamp: '2 hours ago',
-        meta: { beds: 3, baths: 2, area: 150 },
-        isFavorite: false,
-    },
-    {
-        id: '2',
-        title: 'Toyota Camry 2021',
-        price: '18,500',
-        currency: '$',
-        imageUrl: 'https://via.placeholder.com/300x200.png?text=Car',
-        location: 'Tripoli, North',
-        timestamp: '5 hours ago',
-        meta: { area: 0 },
-        isFavorite: true,
-    },
-    {
-        id: '3',
-        title: 'iPhone 13 Pro Max - 256GB',
-        price: '850',
-        currency: '$',
-        imageUrl: 'https://via.placeholder.com/300x200.png?text=Phone',
-        location: 'Saida, South',
-        timestamp: '1 day ago',
-    }
-];
-
 const HomeScreen = () => {
-    const navigation: any = useNavigation();
-    const { i18n, t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const navigation = useNavigation<any>();
     const isArabic = i18n.language === 'ar';
-    const langKey = isArabic ? 'ar' : 'en';
 
-    const getLocalizedName = (name?: string, name_l1?: string): string => {
-        if (isArabic) {
-            return name_l1 || name || '';
-        }
-        return name || name_l1 || '';
-    };
-
-    const [categories, setCategories] = useState<CategoryData[]>([]);
-    const [groupedAds, setGroupedAds] = useState<{ category: CategoryData; ads: ListingData[] }[]>([]);
-    const [currentLocation, setCurrentLocation] = useState<string>('Lebanon');
-
+    const [categories, setCategories] = useState<CategoryData[]>(FALLBACK_CATEGORIES);
+    const [freshAds, setFreshAds] = useState<ListingData[]>([]);
     const [loading, setLoading] = useState(true);
-    const [loadingAds, setLoadingAds] = useState(true);
 
     useEffect(() => {
-        const initializeHomeData = async () => {
+        const loadHomeData = async () => {
             try {
-                setLoading(true);
-                setLoadingAds(true);
-
-                // 1. Fetch Location Filter mapping strictly
-                try {
-                    const locData = await fetchLocations({ language: langKey }) as any;
-                    const locHits = locData.responses?.[0]?.hits?.hits || [];
-                    if (locHits.length > 0) {
-                        const firstChoice = locHits[0]._source;
-                        setCurrentLocation(getLocalizedName(firstChoice.name, firstChoice.name_l1));
-                    }
-                } catch (err) {
-                    console.log('Failed to fetch location text.');
+                // 1. Fetch Categories
+                const catsResponse = await getCategories();
+                const fetchedCats = catsResponse.data
+                    ?.filter((c: any) => c.parent_id === null)
+                    .map((c: any) => ({
+                        id: String(c.id),
+                        name: c.name,
+                        icon: mapCategoryIcon(c.id)
+                    }));
+                
+                if (fetchedCats && fetchedCats.length > 0) {
+                    setCategories(fetchedCats.slice(0, 6)); // Show top 6
                 }
 
-                // 2. Fetch Categories
-                let rootCatsMapped: CategoryData[] = [];
-                try {
-                    const catData = await getCategories() as any;
-                    if (Array.isArray(catData)) {
-                        const rootCats = catData.filter((c: any) => c.parentID === null);
-                        rootCatsMapped = rootCats.map((c: any) => ({
-                            id: String(c.id),
-                            name: getLocalizedName(c.name, c.name_l1),
-                            icon: mapCategoryIcon(c.id),
-                        }));
+                // 2. Fetch Initial "Fresh" Ads
+                const adsResponse = await fetchAds({
+                    language: isArabic ? 'ar' : 'en',
+                    size: 10
+                } as any);
+
+                const hits = adsResponse.responses?.[0]?.hits?.hits || [];
+                const formattedAds = hits.map((h: any) => ({
+                    id: String(h._source.id),
+                    title: h._source.title,
+                    price: h._source.price?.value?.display || (h._source.price?.value?.amount ? h._source.price.value.amount.toLocaleString() : '0'),
+                    currency: h._source.price?.currency?.isoCode || 'USD',
+                    imageUrl: h._source.mainImage?.url || h._source.images?.[0]?.url || 'https://via.placeholder.com/300x200.png?text=No+Image',
+                    location: h._source.location?.name || h._source.location?.pathName || '',
+                    timestamp: new Date(h._source.created_at || Date.now()).toLocaleDateString(),
+                    isFavorite: false,
+                    meta: {
+                        beds: h._source.parameters?.find((p: any) => p.key === 'rooms')?.value,
+                        baths: h._source.parameters?.find((p: any) => p.key === 'bathrooms')?.value,
+                        area: h._source.parameters?.find((p: any) => p.key === 'area')?.value,
                     }
-                } catch (catErr) {
-                    console.log('Failed to check categories.');
-                }
+                }));
 
-                const finalCategories = rootCatsMapped.length > 0 ? rootCatsMapped : FALLBACK_CATEGORIES;
-                setCategories(finalCategories);
-                setLoading(false); // Enable Categories UI right away
-
-                // 3. Fetch Ads mapped iteratively for the top 3 visible categories
-                const topCats = finalCategories.slice(0, 3);
-                const groupedPromises = topCats.map(async (cat: CategoryData) => {
-                    const adResp = await fetchAds({
-                        categoryId: cat.id,
-                        locationId: '1-30', // Default full scope fallback hierarchy
-                        language: langKey,
-                        size: 8,
-                    }) as any;
-
-                    const hits = adResp.responses?.[0]?.hits?.hits || [];
-
-                    const formattedAds: ListingData[] = hits.map((h: any) => {
-                        const src = h._source || {};
-                        return {
-                            id: String(src.id),
-                            title: src.title,
-                            // Convert safe elastic fallback checks on nested properties
-                            price: src.price?.value?.toLocaleString() || '0',
-                            currency: src.price?.currency?.isoCode || '$',
-                            imageUrl: src.mainImage?.url || 'https://via.placeholder.com/300x200.png?text=No+Image',
-                            location: getLocalizedName(src.location?.name, src.location?.name_l1) || 'Beirut',
-                            timestamp: new Date(src.created_at || Date.now()).toLocaleDateString(),
-                            meta: {
-                                area: src.parameters?.find((p: any) => p.key === 'area')?.value,
-                                beds: src.parameters?.find((p: any) => p.key === 'rooms')?.value,
-                                baths: src.parameters?.find((p: any) => p.key === 'baths')?.value,
-                            },
-                        };
-                    });
-
-                    return { category: cat, ads: formattedAds }; // Pass the block over natively
-                });
-
-                const loadedAdsGroups = await Promise.all(groupedPromises);
-
-                // Filter out empty results to prevent rendering empty lists
-                setGroupedAds(loadedAdsGroups.filter(grouped => grouped.ads.length > 0));
+                setFreshAds(formattedAds);
 
             } catch (error) {
-                console.log('Central home loading failed:', error);
-
-                // Fallback rendering
-                setCategories(FALLBACK_CATEGORIES);
-                setGroupedAds([{ category: FALLBACK_CATEGORIES[0], ads: LISTINGS }]);
+                console.log('Error loading home data:', error);
             } finally {
                 setLoading(false);
-                setLoadingAds(false);
             }
         };
 
-        initializeHomeData();
-    }, [isArabic, langKey]);
+        loadHomeData();
+    }, [isArabic]);
 
     return (
-        <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+        <SafeAreaView style={styles.safeArea}>
             <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-            <AppBar
-                location={currentLocation}
-                onLocationPress={() => { }}
-                onNotificationPress={() => { }}
+            <AppBar 
+                location="Lebanon" 
+                onLocationPress={() => {}} 
+                onNotificationPress={() => {}} 
             />
-
-            <ScrollView
+            
+            <ScrollView 
                 style={styles.container}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
                 <SearchField onPress={() => navigation.navigate('SearchScreen')} />
-
+                
                 <ImageBanner />
-
-                <SectionHeader
-                    title={t('home.allCategories', 'All categories')}
-                    actionLabel={t('home.seeAll', 'See all')}
-                    onActionPress={() => { }}
+                
+                <SectionHeader 
+                    title={t('home.allCategories', 'All categories')} 
+                    actionLabel={t('home.seeAll', 'See all')} 
+                    onActionPress={() => {}} 
                 />
-
-                <View style={styles.categoriesContainer}>
-                    {loading ? (
-                        <ActivityIndicator size="small" color="#F5C518" style={styles.loader} />
-                    ) : (
-                        <FlashList
-                            horizontal
-                            data={categories}
-                            keyExtractor={(item) => item.id}
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={styles.horizontalListPadding}
-                            renderItem={({ item }) => (
-                                <CategoryItem item={item as CategoryData} onPress={() => { }} />
-                            )}
-                        />
-                    )}
-                </View>
-
-                {loadingAds ? (
-                    <ActivityIndicator size="large" color="#F5C518" style={styles.adsLoader} />
+                
+                {loading && categories === FALLBACK_CATEGORIES ? (
+                    <ActivityIndicator size="small" color="#F5C518" style={{marginVertical: 20}} />
                 ) : (
-                    groupedAds.map((group) => (
-                        <View key={group.category.id} style={styles.groupContainer}>
-                            <SectionHeader
-                                title={t('home.freshRecommendations', `Fresh ${group.category.name}`)}
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalListPadding}>
+                        {categories.map((item) => (
+                            <CategoryItem 
+                                key={item.id} 
+                                item={item} 
+                                onPress={() => navigation.navigate('SearchScreen', { categoryId: item.id })} 
                             />
-
-                            <View style={styles.listingsContainer}>
-                                <FlashList<ListingData>
-                                    horizontal
-                                    data={group.ads}
-                                    keyExtractor={(item) => item.id}
-                                    showsHorizontalScrollIndicator={false}
-                                    contentContainerStyle={styles.horizontalListPadding}
-                                    renderItem={({ item }) => (
-                                        <ListingCard
-                                            item={item as ListingData}
-                                            onPress={() => { }}
-                                            onFavoritePress={() => { }}
-                                        />
-                                    )}
-                                />
-                            </View>
-                        </View>
-                    ))
+                        ))}
+                    </ScrollView>
                 )}
-
-                {/* Spacer for bottom navigation bar */}
+                
+                <SectionHeader 
+                    title={t('home.freshRecommendations', 'Fresh recommendations')} 
+                />
+                
+                {loading && freshAds.length === 0 ? (
+                    <ActivityIndicator size="large" color="#F5C518" style={{marginTop: 40}} />
+                ) : (
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalListPadding}>
+                        {freshAds.map((item) => (
+                            <ListingCard 
+                                key={item.id}
+                                item={item} 
+                                onPress={() => {}} 
+                                onFavoritePress={() => {}} 
+                            />
+                        ))}
+                    </ScrollView>
+                )}
+                
                 <View style={styles.bottomSpacer} />
             </ScrollView>
         </SafeAreaView>
@@ -270,28 +171,11 @@ const styles = StyleSheet.create({
     scrollContent: {
         paddingBottom: 20,
     },
-    categoriesContainer: {
-        height: 100,
-        width: '100%',
-    },
-    listingsContainer: {
-        height: 260,
-        width: '100%',
-    },
     horizontalListPadding: {
         paddingHorizontal: 16,
     },
-    loader: {
-        marginTop: 20,
-    },
-    adsLoader: {
-        marginTop: 40,
-    },
-    groupContainer: {
-        marginBottom: 10,
-    },
     bottomSpacer: {
-        height: 80,
+        height: 80, 
     }
 });
 
