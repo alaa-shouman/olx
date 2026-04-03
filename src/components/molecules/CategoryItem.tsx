@@ -6,6 +6,7 @@ export interface CategoryData {
     id: string;
     name: string;
     icon: string;
+    _raw?: any;
 }
 
 interface CategoryItemProps {

@@ -110,7 +110,8 @@ const HomeScreen = () => {
                 .map((c: any) => ({
                     id: String(c.id),
                     name: isArabic ? (c.name_l1 || c.name) : c.name,
-                    icon: mapCategoryIcon(c.id)
+                    icon: mapCategoryIcon(c.id),
+                    _raw: c
                 }));
 
             if (topCategories && topCategories.length > 0) {
@@ -137,7 +138,7 @@ const HomeScreen = () => {
                 })
             );
 
-            setSections(sectionsData.filter(s => s.ads.length > 0));
+            setSections(sectionsData.filter((s: any) => s.ads.length > 0));
 
         } catch (error) {
             console.log('Error loading home data:', error);
@@ -185,7 +186,7 @@ const HomeScreen = () => {
                 <SectionHeader
                     title={t('home.allCategories', 'All categories')}
                     actionLabel={t('home.seeAll', 'See all')}
-                    onActionPress={() => { }}
+                    onActionPress={() => navigation.navigate('CategoryListScreen')}
                 />
 
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalListPadding}>
@@ -193,7 +194,10 @@ const HomeScreen = () => {
                         <CategoryItem
                             key={item.id}
                             item={item}
-                            onPress={() => navigation.navigate('SearchScreen', { categoryId: item.id })}
+                            onPress={() => item._raw
+                                ? navigation.navigate('CategoryListScreen', { category: item._raw })
+                                : navigation.navigate('SearchScreen', { categoryId: item.id })
+                            }
                         />
                     ))}
                 </ScrollView>
