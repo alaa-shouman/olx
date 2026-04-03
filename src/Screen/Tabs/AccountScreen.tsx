@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, StatusBar, Image } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, StatusBar, Image, Platform } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 import { changeAppLanguage } from '../../../i18n';
@@ -14,6 +14,8 @@ const AccountScreen = () => {
         await changeAppLanguage(newLang);
     };
 
+    const textRTLStyle = Platform.OS === 'ios' && isArabic ? { textAlign: 'left' as const, alignSelf: 'flex-start' as const } : {};
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
@@ -25,9 +27,9 @@ const AccountScreen = () => {
                         <Ionicons name="person" size={50} color="#0A2C2A" style={styles.avatarIcon} />
                     </View>
                     <View style={styles.profileTexts}>
-                        <Text style={styles.loginTitle}>{t('account.login', 'Log in')}</Text>
+                        <Text style={[styles.loginTitle, textRTLStyle]}>{t('account.login', 'Log in')}</Text>
                         <TouchableOpacity>
-                            <Text style={styles.loginSubtitle}>{t('account.loginToYourAccount', 'Log in to your account')}</Text>
+                            <Text style={[styles.loginSubtitle, textRTLStyle]}>{t('account.loginToYourAccount', 'Log in to your account')}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -37,7 +39,7 @@ const AccountScreen = () => {
                     <TouchableOpacity style={styles.menuItem}>
                         <Ionicons name="chatbubbles-outline" size={24} color="#1E2329" style={styles.menuIcon} />
                         <View style={styles.menuTexts}>
-                            <Text style={styles.menuTitle}>{t('account.blog', 'Blog')}</Text>
+                            <Text style={[styles.menuTitle, textRTLStyle]}>{t('account.blog', 'Blog')}</Text>
                         </View>
                         <Ionicons name={isArabic ? "chevron-back" : "chevron-forward"} size={20} color="#1E2329" />
                     </TouchableOpacity>
@@ -47,8 +49,8 @@ const AccountScreen = () => {
                             <Text style={styles.customIconText}>olx</Text>
                         </View>
                         <View style={styles.menuTexts}>
-                            <Text style={styles.menuTitle}>{t('account.helpAndSupport', 'Help & Support')}</Text>
-                            <Text style={styles.menuSubtitle}>{t('account.helpCenter', 'Help center and legal terms')}</Text>
+                            <Text style={[styles.menuTitle, textRTLStyle]}>{t('account.helpAndSupport', 'Help & Support')}</Text>
+                            <Text style={[styles.menuSubtitle, textRTLStyle]}>{t('account.helpCenter', 'Help center and legal terms')}</Text>
                         </View>
                         <Ionicons name={isArabic ? "chevron-back" : "chevron-forward"} size={20} color="#1E2329" />
                     </TouchableOpacity>
@@ -56,8 +58,8 @@ const AccountScreen = () => {
                     <TouchableOpacity style={styles.menuItem}>
                         <Ionicons name="chatbubble-ellipses-outline" size={24} color="#1E2329" style={styles.menuIcon} />
                         <View style={styles.menuTexts}>
-                            <Text style={styles.menuTitle}>{t('account.customerSupport', 'Customer Support')}</Text>
-                            <Text style={styles.menuSubtitle}>{t('account.getAssistance', 'Get assistance from our support team')}</Text>
+                            <Text style={[styles.menuTitle, textRTLStyle]}>{t('account.customerSupport', 'Customer Support')}</Text>
+                            <Text style={[styles.menuSubtitle, textRTLStyle]}>{t('account.getAssistance', 'Get assistance from our support team')}</Text>
                         </View>
                         <Ionicons name={isArabic ? "chevron-back" : "chevron-forward"} size={20} color="#1E2329" />
                     </TouchableOpacity>
@@ -65,8 +67,8 @@ const AccountScreen = () => {
                     <TouchableOpacity style={styles.menuItem} onPress={toggleLanguage}>
                         <Ionicons name="globe-outline" size={24} color="#1E2329" style={styles.menuIcon} />
                         <View style={styles.menuTexts}>
-                            <Text style={styles.menuTitle}>{t('account.changeLanguageTitle', 'العربية')}</Text>
-                            <Text style={styles.menuSubtitle}>{t('account.changeLanguage', 'Change language')}</Text>
+                            <Text style={[styles.menuTitle, textRTLStyle]}>{t('account.changeLanguageTitle', 'العربية')}</Text>
+                            <Text style={[styles.menuSubtitle, textRTLStyle]}>{t('account.changeLanguage', 'Change language')}</Text>
                         </View>
                         <Ionicons name={isArabic ? "chevron-back" : "chevron-forward"} size={20} color="#1E2329" />
                     </TouchableOpacity>
@@ -74,7 +76,7 @@ const AccountScreen = () => {
                     <TouchableOpacity style={styles.menuItem}>
                         <Ionicons name="settings-outline" size={24} color="#1E2329" style={styles.menuIcon} />
                         <View style={styles.menuTexts}>
-                            <Text style={styles.menuTitle}>{t('account.settings', 'Settings')}</Text>
+                            <Text style={[styles.menuTitle, textRTLStyle]}>{t('account.settings', 'Settings')}</Text>
                         </View>
                         <Ionicons name={isArabic ? "chevron-back" : "chevron-forward"} size={20} color="#1E2329" />
                     </TouchableOpacity>
