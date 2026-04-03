@@ -135,6 +135,7 @@ const styles = StyleSheet.create({
         padding: 20,
         borderBottomWidth: 1,
         borderColor: "#EEEEEE",
+        marginEnd: "auto",
     },
     seeAllText: {
         fontSize: 16,
