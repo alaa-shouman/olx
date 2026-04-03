@@ -34,6 +34,7 @@ export interface FetchAdsPayload {
   language?: 'en' | 'ar';
   from?: number;
   size?: number;
+  dynamicFilters?: Record<string, any>;
 }
 
 export interface FetchAdsResponse {

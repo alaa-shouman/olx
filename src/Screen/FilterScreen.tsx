@@ -5,13 +5,33 @@ import { DynamicFilter } from '../validation';
 import { useTranslation } from 'react-i18next';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import LocationModal, { LocationItem } from '../components/molecules/LocationModal';
 
 const FilterScreen = ({ navigation, route }: any) => {
-    const categoryId = route.params?.categoryId || '23'; // Defaults to Vehicles -> Cars (23) testing spec
+    // We should parse 51 for Cars, 70 for Mobile Phones, 60 for Apartments as OLX LB mappings returned by the actual API
+    let categoryId = route.params?.categoryId;
+    if (!categoryId) categoryId = '51'; // Defaults to Cars for sale for testing
+
+    // Convert old mock IDs if user testing passed them directly
+    if (categoryId === '23') categoryId = '51'; // Pet -> Cars
+    if (categoryId === '402') categoryId = '70'; // Mobile phone
+    if (categoryId === '1426') categoryId = '60'; // Apartments
+
+    const appliedFilters = route.params?.appliedFilters || {};
+    const appliedLocationId = route.params?.appliedLocationId || null;
+
     const { t, i18n } = useTranslation();
     const isArabic = i18n.language === 'ar';
+
     const [filters, setFilters] = useState<DynamicFilter[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // State for local changes
+    const [selectedFilters, setSelectedFilters] = useState<Record<string, any>>(appliedFilters);
+    const [location, setLocation] = useState<{ id: string, name: string, externalID?: string } | null>(
+        appliedLocationId ? { id: appliedLocationId, name: t('filter.selectedLocation', 'Custom Location'), externalID: appliedLocationId } : null
+    );
+    const [isLocationModalVisible, setLocationModalVisible] = useState(false);
 
     useEffect(() => {
         const fetchFilters = async () => {
@@ -28,12 +48,77 @@ const FilterScreen = ({ navigation, route }: any) => {
         fetchFilters();
     }, [categoryId]);
 
-    // Mock category details mapped from ID (In real app, comes from categories API)
+    const handleApply = () => {
+        navigation.navigate({
+            name: 'SearchScreen',
+            params: {
+                categoryId: categoryId,
+                appliedFilters: selectedFilters,
+                appliedLocationId: location?.externalID || location?.id || null
+            },
+            merge: true,
+        });
+    };
+
+    const handleClearAll = () => {
+        setSelectedFilters({});
+        setLocation(null);
+    };
+
+    // Helper functions for state manipulation
+    const updateFilter = (attr: string, value: any) => {
+        setSelectedFilters(prev => ({
+            ...prev,
+            [attr]: value
+        }));
+    };
+
+    const toggleMultipleChoice = (attr: string, choiceValue: string) => {
+        setSelectedFilters(prev => {
+            const current = Array.isArray(prev[attr]) ? prev[attr] : [];
+            const isSelected = current.includes(choiceValue);
+
+            let newArr;
+            if (isSelected) {
+                newArr = current.filter((v: string) => v !== choiceValue);
+            } else {
+                newArr = [...current, choiceValue];
+            }
+
+            return {
+                ...prev,
+                [attr]: newArr.length > 0 ? newArr : undefined
+            };
+        });
+    };
+
+    const updateRange = (attr: string, type: 'gte' | 'lte', val: string) => {
+        const num = parseInt(val, 10);
+        setSelectedFilters(prev => {
+            const current = typeof prev[attr] === 'object' && prev[attr] !== null ? { ...prev[attr] } : {};
+            if (isNaN(num)) {
+                delete current[type];
+            } else {
+                current[type] = num;
+            }
+
+            // Remove entirely if empty
+            if (Object.keys(current).length === 0) {
+                const newState = { ...prev };
+                delete newState[attr];
+                return newState;
+            }
+
+            return { ...prev, [attr]: current };
+        });
+    };
+
+    // Category mapping to nice UI representation
     const getCategoryDetails = () => {
-        switch (categoryId) {
-            case '23': return { name: t('mockCategories.carsForSale', 'Cars for sale'), icon: 'car-sport' };
-            case '402': return { name: t('mockCategories.mobilePhones', 'Mobile Phones'), icon: 'phone-portrait' };
-            case '1426': return { name: t('mockCategories.apartmentsForSale', 'Apartments for sale'), icon: 'business' };
+        switch (String(categoryId)) {
+            case '51': return { name: t('mockCategories.carsForSale', 'Cars for sale'), icon: 'car-sport' };
+            case '70': return { name: t('mockCategories.mobilePhones', 'Mobile Phones'), icon: 'phone-portrait' };
+            case '60': return { name: t('mockCategories.apartmentsForSale', 'Apartments for sale'), icon: 'business' };
             default: return { name: t('mockCategories.allCategories', 'All Categories'), icon: 'grid' };
         }
     };
@@ -47,7 +132,7 @@ const FilterScreen = ({ navigation, route }: any) => {
                     <Ionicons name="close" size={28} color="#212121" />
                 </TouchableOpacity>
                 <Text style={styles.title}>{t('filter.title', 'Filters')}</Text>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={handleClearAll}>
                     <Text style={styles.clearText}>{t('filter.clearAll', 'Clear all')}</Text>
                 </TouchableOpacity>
             </View>
@@ -68,16 +153,16 @@ const FilterScreen = ({ navigation, route }: any) => {
                                 </View>
                                 <Text style={styles.categoryName}>{catDetails.name}</Text>
                             </View>
-                            <TouchableOpacity>
+                            <TouchableOpacity onPress={() => navigation.navigate('CategoryListScreen')}>
                                 <Text style={styles.changeText}>{t('filter.change', 'Change')}</Text>
                             </TouchableOpacity>
                         </View>
 
-                        {/* Location List Item (Mocked standard item) */}
-                        <TouchableOpacity style={styles.listItem}>
+                        {/* Location List Item */}
+                        <TouchableOpacity style={styles.listItem} onPress={() => setLocationModalVisible(true)}>
                             <Text style={styles.listLabel}>{t('filter.location', 'Location')}</Text>
                             <View style={styles.listAction}>
-                                <Text style={styles.listValue}>{t('filter.allCountry', 'All country')}</Text>
+                                <Text style={styles.listValue}>{location ? location.name : t('filter.allCountry', 'All country')}</Text>
                                 <Ionicons name={isArabic ? "chevron-back" : "chevron-forward"} size={20} color="#757575" />
                             </View>
                         </TouchableOpacity>
@@ -85,6 +170,7 @@ const FilterScreen = ({ navigation, route }: any) => {
                         {/* Dynamic Filters */}
                         {filters.map((filter) => {
                             if (filter.filterType === 'range') {
+                                const currentRange = selectedFilters[filter.attribute] || {};
                                 return (
                                     <View key={filter.id} style={styles.filterSection}>
                                         <Text style={styles.sectionLabel}>{filter.name}</Text>
@@ -95,6 +181,8 @@ const FilterScreen = ({ navigation, route }: any) => {
                                                     placeholder={t('filter.min', 'Min')}
                                                     keyboardType="numeric"
                                                     placeholderTextColor="#9E9E9E"
+                                                    value={currentRange.gte !== undefined ? String(currentRange.gte) : ''}
+                                                    onChangeText={(val) => updateRange(filter.attribute, 'gte', val)}
                                                 />
                                             </View>
                                             <View style={styles.inputContainer}>
@@ -103,6 +191,8 @@ const FilterScreen = ({ navigation, route }: any) => {
                                                     placeholder={t('filter.max', 'Max')}
                                                     keyboardType="numeric"
                                                     placeholderTextColor="#9E9E9E"
+                                                    value={currentRange.lte !== undefined ? String(currentRange.lte) : ''}
+                                                    onChangeText={(val) => updateRange(filter.attribute, 'lte', val)}
                                                 />
                                             </View>
                                         </View>
@@ -111,13 +201,23 @@ const FilterScreen = ({ navigation, route }: any) => {
                             }
 
                             if (filter.filterType === 'multiple_choice') {
+                                const currentSelection = Array.isArray(selectedFilters[filter.attribute]) ? selectedFilters[filter.attribute] : [];
+
                                 // If many choices, render as list item (e.g., Brand, Payment Options)
                                 if (filter.choices && filter.choices.length > 5) {
+                                    // For a real app, this opens another modal list. Here we just show the first selected or Any.
+                                    const selectedChoice = filter.choices.find(c => currentSelection.includes(c.value));
+
                                     return (
-                                        <TouchableOpacity key={filter.id} style={styles.listItem}>
+                                        <TouchableOpacity key={filter.id} style={styles.listItem} onPress={() => {
+                                            // Mock simply toggling the first item for now without complex modals
+                                            if (filter.choices && filter.choices.length > 0) {
+                                                toggleMultipleChoice(filter.attribute, filter.choices[0].value);
+                                            }
+                                        }}>
                                             <Text style={styles.listLabel}>{filter.name}</Text>
                                             <View style={styles.listAction}>
-                                                <Text style={styles.listValue}>{t('filter.any', 'Any')}</Text>
+                                                <Text style={styles.listValue}>{selectedChoice ? selectedChoice.label : t('filter.any', 'Any')}</Text>
                                                 <Ionicons name={isArabic ? "chevron-back" : "chevron-forward"} size={20} color="#757575" />
                                             </View>
                                         </TouchableOpacity>
@@ -129,29 +229,46 @@ const FilterScreen = ({ navigation, route }: any) => {
                                     <View key={filter.id} style={styles.filterSection}>
                                         <Text style={styles.sectionLabel}>{filter.name}</Text>
                                         <View style={styles.pillsContainer}>
-                                            <TouchableOpacity style={[styles.pill, styles.pillActive]}>
-                                                <Text style={[styles.pillText, styles.pillTextActive]}>{t('filter.any', 'Any')}</Text>
+                                            <TouchableOpacity
+                                                style={[styles.pill, currentSelection.length === 0 && styles.pillActive]}
+                                                onPress={() => updateFilter(filter.attribute, undefined)}
+                                            >
+                                                <Text style={[styles.pillText, currentSelection.length === 0 && styles.pillTextActive]}>{t('filter.any', 'Any')}</Text>
                                             </TouchableOpacity>
-                                            {filter.choices?.map((choice) => (
-                                                <TouchableOpacity key={choice.id} style={styles.pill}>
-                                                    <Text style={styles.pillText}>{choice.label}</Text>
-                                                </TouchableOpacity>
-                                            ))}
+                                            {filter.choices?.map((choice) => {
+                                                const isActive = currentSelection.includes(choice.value);
+                                                return (
+                                                    <TouchableOpacity
+                                                        key={choice.id}
+                                                        style={[styles.pill, isActive && styles.pillActive]}
+                                                        onPress={() => toggleMultipleChoice(filter.attribute, choice.value)}
+                                                    >
+                                                        <Text style={[styles.pillText, isActive && styles.pillTextActive]}>{choice.label}</Text>
+                                                    </TouchableOpacity>
+                                                );
+                                            })}
                                         </View>
                                     </View>
                                 );
                             }
 
                             if (filter.filterType === 'boolean') {
+                                const isActive = selectedFilters[filter.attribute] === 'yes';
                                 return (
                                     <View key={filter.id} style={styles.filterSection}>
                                         <Text style={styles.sectionLabel}>{filter.name}</Text>
                                         <View style={styles.pillsContainer}>
-                                            <TouchableOpacity style={[styles.pill, styles.pillActive]}>
-                                                <Text style={[styles.pillText, styles.pillTextActive]}>{t('filter.any', 'Any')}</Text>
+                                            <TouchableOpacity
+                                                style={[styles.pill, !isActive && styles.pillActive]}
+                                                onPress={() => updateFilter(filter.attribute, undefined)}
+                                            >
+                                                <Text style={[styles.pillText, !isActive && styles.pillTextActive]}>{t('filter.any', 'Any')}</Text>
                                             </TouchableOpacity>
-                                            <TouchableOpacity style={styles.pill}>
-                                                <Text style={styles.pillText}>{t('filter.yes', 'Yes')}</Text>
+                                            <TouchableOpacity
+                                                style={[styles.pill, isActive && styles.pillActive]}
+                                                onPress={() => updateFilter(filter.attribute, 'yes')}
+                                            >
+                                                <Text style={[styles.pillText, isActive && styles.pillTextActive]}>{t('filter.yes', 'Yes')}</Text>
                                             </TouchableOpacity>
                                         </View>
                                     </View>
@@ -165,10 +282,19 @@ const FilterScreen = ({ navigation, route }: any) => {
             )}
 
             <View style={styles.footer}>
-                <TouchableOpacity style={styles.applyButton} onPress={() => navigation.goBack()}>
+                <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
                     <Text style={styles.applyText}>{t('filter.apply', 'See Results')}</Text>
                 </TouchableOpacity>
             </View>
+
+            <LocationModal
+                visible={isLocationModalVisible}
+                onClose={() => setLocationModalVisible(false)}
+                onSelect={(loc) => {
+                    setLocation(loc);
+                    setLocationModalVisible(false);
+                }}
+            />
         </SafeAreaView>
     );
 };

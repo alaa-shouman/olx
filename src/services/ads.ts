@@ -18,6 +18,7 @@ export const fetchAds = async (
       priceMax,
       searchTerm,
       language = 'en',
+      dynamicFilters,
       from = 0,
       size = 12,
     } = data;
@@ -30,6 +31,23 @@ export const fetchAds = async (
 
     // Must array contains the guaranteed query terms
     const mustConditions: any[] = [];
+    const filterConditions: any[] = [];
+
+    if (dynamicFilters) {
+      Object.keys(dynamicFilters).forEach(key => {
+        const val = dynamicFilters[key];
+        const esKey = key === 'price' ? 'price.value' : `extraFields.${key}`;
+
+        if (typeof val === 'object' && !Array.isArray(val)) {
+          // Range (gte, lte)
+          filterConditions.push({ range: { [esKey]: val } });
+        } else if (Array.isArray(val) && val.length > 0) {
+          mustConditions.push({ terms: { [esKey]: val } });
+        } else if (val !== undefined && val !== null && val !== '') {
+          mustConditions.push({ term: { [esKey]: val } });
+        }
+      });
+    }
 
     if (categoryId) {
       mustConditions.push({ term: { 'category.id': categoryId } });
@@ -50,9 +68,6 @@ export const fetchAds = async (
         },
       });
     }
-
-    // Building Filters
-    const filterConditions: any[] = [];
 
     if (priceMin !== undefined || priceMax !== undefined) {
       const rangeCondition: any = {};

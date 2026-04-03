@@ -13,6 +13,8 @@ const SearchScreen = ({ navigation, route }: any) => {
     const initialQuery = route.params?.query || '';
     const initialCategory = route.params?.categoryId || null;
     const initialCategoryName = route.params?.categoryName || null;
+    const appliedDynamicFilters = route.params?.appliedFilters || {};
+    const appliedLocationId = route.params?.appliedLocationId || null;
 
     const [searchQuery, setSearchQuery] = useState(initialQuery);
     const [ads, setAds] = useState<SearchListingData[]>([]);
@@ -25,6 +27,8 @@ const SearchScreen = ({ navigation, route }: any) => {
             const data = await fetchAds({
                 searchTerm: queryOverride !== undefined ? queryOverride : searchQuery,
                 categoryId: initialCategory,
+                locationId: appliedLocationId,
+                dynamicFilters: Object.keys(appliedDynamicFilters).length > 0 ? appliedDynamicFilters : undefined,
                 language: isArabic ? 'ar' : 'en',
                 size: 20
             } as any);
@@ -70,7 +74,7 @@ const SearchScreen = ({ navigation, route }: any) => {
         }, 300);
 
         return () => clearTimeout(delayDebounceFn);
-    }, [searchQuery, initialCategory]);
+    }, [searchQuery, initialCategory, appliedLocationId, JSON.stringify(appliedDynamicFilters)]);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -109,7 +113,11 @@ const SearchScreen = ({ navigation, route }: any) => {
                             style={[styles.pill, item.active && styles.pillActive]}
                             onPress={() => {
                                 if (item.id === 'filter') {
-                                    navigation.navigate('FilterScreen', { categoryId: initialCategory });
+                                    navigation.navigate('FilterScreen', {
+                                        categoryId: initialCategory,
+                                        appliedFilters: appliedDynamicFilters,
+                                        appliedLocationId: appliedLocationId
+                                    });
                                 } else if (item.id === 'category') {
                                     navigation.navigate('CategoryListScreen');
                                 }
