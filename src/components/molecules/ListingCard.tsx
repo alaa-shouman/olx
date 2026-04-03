@@ -5,6 +5,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.48; // ~48vw
 
+export interface MetaItemData {
+    key: string;
+    value: string | number;
+    icon: string;
+}
+
 export interface ListingData {
     id: string;
     title: string;
@@ -13,11 +19,7 @@ export interface ListingData {
     imageUrl: string;
     location: string;
     timestamp: string;
-    meta?: {
-        beds?: number;
-        baths?: number;
-        area?: number;
-    };
+    meta?: MetaItemData[];
     isFavorite?: boolean;
 }
 
@@ -45,26 +47,14 @@ const ListingCard: React.FC<ListingCardProps> = ({ item, onPress, onFavoritePres
                 <Text style={styles.price}>{item.currency} {item.price}</Text>
                 <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
 
-                {item.meta ? (
+                {item.meta && item.meta.length > 0 ? (
                     <View style={styles.metaRow}>
-                        {item.meta.beds !== undefined ? (
-                            <View style={styles.metaItem}>
-                                <Ionicons name="bed-outline" size={12} color="#757575" />
-                                <Text style={styles.metaText}>{item.meta.beds}</Text>
+                        {item.meta.slice(0, 3).map((m, index) => (
+                            <View key={`${m.key}-${index}`} style={styles.metaItem}>
+                                <Ionicons name={m.icon} size={12} color="#757575" />
+                                <Text style={styles.metaText}>{m.value}</Text>
                             </View>
-                        ) : null}
-                        {item.meta.baths !== undefined ? (
-                            <View style={styles.metaItem}>
-                                <Ionicons name="water-outline" size={12} color="#757575" />
-                                <Text style={styles.metaText}>{item.meta.baths}</Text>
-                            </View>
-                        ) : null}
-                        {item.meta.area !== undefined ? (
-                            <View style={styles.metaItem}>
-                                <Ionicons name="scan-outline" size={12} color="#757575" />
-                                <Text style={styles.metaText}>{item.meta.area} m²</Text>
-                            </View>
-                        ) : null}
+                        ))}
                     </View>
                 ) : null}
 
@@ -99,7 +89,7 @@ const styles = StyleSheet.create({
     favoriteBtn: {
         position: 'absolute',
         top: 8,
-        right: 8, // Intentionally standard to map physically, but we can use end: 8 for RTL
+        end: 8,
         backgroundColor: 'rgba(0,0,0,0.3)',
         borderRadius: 16,
         padding: 4,

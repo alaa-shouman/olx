@@ -14,6 +14,7 @@ import LocationModal from '../../components/molecules/LocationModal';
 
 import { getCategories } from '../../services/categories';
 import { fetchAds } from '../../services/ads';
+import { extractAdMeta } from '../../utils/adFormatUtils';
 
 // Define the shape for a Category Section on the Home Screen
 interface CategorySection {
@@ -66,20 +67,24 @@ const HomeScreen = () => {
         const title = isArabic ? (h._source.title_l1 || h._source.title) : h._source.title;
         const locName = isArabic ? (h._source.location?.name_l1 || h._source.location?.name) : (h._source.location?.name || h._source.location?.pathName);
 
+        const extraFields = h._source.formattedExtraFields || [];
+        const priceField = extraFields.find((f: any) => f.attribute === 'price' || f.name === 'Price') || {};
+        let price = isArabic ? (priceField.formattedValue_l1 || priceField.formattedValue) : (priceField.formattedValue || priceField.formattedValue_l1);
+        
+        if (!price) {
+            price = h._source.extraFields?.price?.toLocaleString() || h._source.price?.toString() || '0';
+        }
+
         return {
             id: String(h._source.id),
             title: title,
-            price: h._source.price?.value?.display || (h._source.price?.value?.amount ? h._source.price.value.amount.toLocaleString() : '0'),
+            price: price,
             currency: h._source.price?.currency?.isoCode || 'USD',
             imageUrl: h._source.mainImage?.url || h._source.images?.[0]?.url || 'https://via.placeholder.com/300x200.png?text=No+Image',
             location: locName || '',
             timestamp: new Date(h._source.created_at || Date.now()).toLocaleDateString(),
             isFavorite: false,
-            meta: {
-                beds: h._source.parameters?.find((p: any) => p.key === 'rooms')?.value,
-                baths: h._source.parameters?.find((p: any) => p.key === 'bathrooms')?.value,
-                area: h._source.parameters?.find((p: any) => p.key === 'area')?.value,
-            }
+            meta: extractAdMeta(h._source.parameters || [])
         };
     };
 
@@ -89,7 +94,7 @@ const HomeScreen = () => {
                 categoryId,
                 locationId,
                 language: language as any,
-                size: 8
+                size: 10
             } as any);
             const hits = adsResponse.responses?.[0]?.hits?.hits || [];
             return hits.map(formatAd);
@@ -103,9 +108,10 @@ const HomeScreen = () => {
         setLoading(true);
         try {
             // 1. Fetch Categories
-            const catsResponse = await getCategories();
-            const topCategories = catsResponse.data
-                ?.filter((c: any) => c.parent_id === null)
+            const catsResponse: any = await getCategories();
+            const categoriesArray = Array.isArray(catsResponse) ? catsResponse : (catsResponse.data || []);
+            const topCategories = categoriesArray
+                .filter((c: any) => !c.parent_id)
                 .slice(0, 6)
                 .map((c: any) => ({
                     id: String(c.id),
@@ -118,10 +124,10 @@ const HomeScreen = () => {
                 setCategories(topCategories);
             }
 
-            // 2. Fetch Ads for top categories in parallel
+            // 2. Fetch Ads for categories in parallel
             const categoriesToFetch = (topCategories && topCategories.length > 0)
-                ? topCategories.slice(0, 4)
-                : FALLBACK_CATEGORIES.slice(0, 4);
+                ? topCategories
+                : FALLBACK_CATEGORIES;
 
             const language = i18n.language;
             const locationId = selectedLocation.externalID;
@@ -179,7 +185,7 @@ const HomeScreen = () => {
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#F5C518']} />
                 }
             >
-                <SearchField onPress={() => navigation.navigate('SearchScreen')} />
+                <SearchField onPress={() => navigation.navigate('CategoryListScreen')} />
 
                 <ImageBanner />
 
@@ -212,7 +218,14 @@ const HomeScreen = () => {
                             <SectionHeader
                                 title={section.name}
                                 actionLabel={t('home.seeAll', 'See all')}
-                                onActionPress={() => navigation.navigate('SearchScreen', { categoryId: section.id })}
+                                onActionPress={() => {
+                                    const rawCategory = categories.find(c => c.id === section.id)?._raw;
+                                    if (rawCategory) {
+                                        navigation.navigate('CategoryListScreen', { category: rawCategory });
+                                    } else {
+                                        navigation.navigate('SearchScreen', { categoryId: section.id });
+                                    }
+                                }}
                             />
                             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalListPadding}>
                                 {section.ads.map((item) => (

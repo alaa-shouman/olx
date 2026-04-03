@@ -22,10 +22,11 @@ const CategoryListScreen = ({ navigation, route }: any) => {
     const fetchCategories = async () => {
         try {
             setLoading(true);
-            const res = await getCategories();
+            const res: any = await getCategories();
+            const categoriesArray = Array.isArray(res) ? res : (res.data || []);
 
             if (!parentCategory) {
-                const rootCats = res.data?.filter((c: any) => c.parent_id === null) || [];
+                const rootCats = categoriesArray.filter((c: any) => !c.parent_id) || [];
                 setChildren(rootCats);
             } else {
                 const findCategory = (cats: any[], id: string): any => {
@@ -39,7 +40,7 @@ const CategoryListScreen = ({ navigation, route }: any) => {
                     return null;
                 };
 
-                const found = findCategory(res.data || [], String(parentCategory.id));
+                const found = findCategory(categoriesArray, String(parentCategory.id));
                 setChildren(found?.children || []);
             }
         } catch (e) {
@@ -82,19 +83,19 @@ const CategoryListScreen = ({ navigation, route }: any) => {
                 <FlatList
                     data={children}
                     keyExtractor={(item) => String(item.id)}
-                    ListHeaderComponent={() => parentCategory ? (
+                    ListHeaderComponent={() => (
                         <TouchableOpacity
                             style={styles.seeAllBtn}
                             onPress={() => navigation.navigate("SearchScreen", {
-                                categoryId: String(parentCategory.id),
+                                categoryId: parentCategory ? String(parentCategory.id) : null,
                                 categoryName: parentName
                             })}
                         >
                             <Text style={styles.seeAllText}>
-                                {isArabic ? `عرض الكل في ${parentName}` : `See all in ${parentName}`}
+                                {isArabic ? `بحث في ${parentName}` : `Search in ${parentName}`}
                             </Text>
                         </TouchableOpacity>
-                    ) : null}
+                    )}
                     renderItem={({ item }) => {
                         const name = isArabic ? (item.name_l1 || item.name) : item.name;
                         const hasChildren = item.children && item.children.length > 0;

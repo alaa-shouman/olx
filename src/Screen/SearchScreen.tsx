@@ -5,23 +5,25 @@ import { fetchAds } from '../services/ads';
 import SearchListingCard, { SearchListingData } from '../components/molecules/SearchListingCard';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { extractAdMeta } from '../utils/adFormatUtils';
 
 const SearchScreen = ({ navigation, route }: any) => {
     const { t, i18n } = useTranslation();
     const isArabic = i18n.language === 'ar';
     const initialQuery = route.params?.query || '';
     const initialCategory = route.params?.categoryId || null;
+    const initialCategoryName = route.params?.categoryName || null;
 
     const [searchQuery, setSearchQuery] = useState(initialQuery);
     const [ads, setAds] = useState<SearchListingData[]>([]);
     const [loading, setLoading] = useState(false);
     const [totalHits, setTotalHits] = useState(0);
 
-    const loadFilteredAds = async () => {
+    const loadFilteredAds = async (queryOverride?: string) => {
         setLoading(true);
         try {
             const data = await fetchAds({
-                searchTerm: searchQuery,
+                searchTerm: queryOverride !== undefined ? queryOverride : searchQuery,
                 categoryId: initialCategory,
                 language: isArabic ? 'ar' : 'en',
                 size: 20
@@ -33,32 +35,19 @@ const SearchScreen = ({ navigation, route }: any) => {
                 const source = h._source;
                 const parameters = source.parameters || [];
 
-                // Helper to extract dynamic field parameters safely
-                const getParam = (key: string) => {
-                    const param = parameters.find((p: any) => p.key === key);
-                    return param ? param.value : undefined;
-                };
-
                 const title = isArabic ? (source.title_l1 || source.title) : source.title;
                 const locName = isArabic ? (source.location?.name_l1 || source.location?.name) : (source.location?.name || source.location?.pathName);
 
                 return {
                     id: String(source.id),
                     title: title,
-                    price: source.price?.value?.display || (source.price?.value?.amount ? source.price.value.amount.toLocaleString() : '0'),
+                    price : source.extraFields?.price?.toLocaleString() || source.price?.toString() || '0',
                     currency: source.price?.currency?.isoCode || 'USD',
                     imageUrl: source.mainImage?.url || source.images?.[0]?.url,
                     location: locName || '',
                     timestamp: new Date(source.created_at || Date.now()).toLocaleDateString(),
                     isElite: index === 0, // Mocking first item as Elite for UI demo
-                    meta: {
-                        year: getParam('year'),
-                        mileage: getParam('mileage'),
-                        fuel: getParam('fuel'),
-                        beds: getParam('rooms'),
-                        baths: getParam('bathrooms'),
-                        area: getParam('area'),
-                    }
+                    meta: extractAdMeta(parameters)
                 };
             }));
         } catch (e) {
@@ -69,8 +58,9 @@ const SearchScreen = ({ navigation, route }: any) => {
     };
 
     useEffect(() => {
-        loadFilteredAds();
-    }, []);
+        setSearchQuery(initialQuery);
+        loadFilteredAds(initialQuery);
+    }, [initialCategory, initialQuery]);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -85,7 +75,7 @@ const SearchScreen = ({ navigation, route }: any) => {
                         style={styles.searchInput}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
-                        onSubmitEditing={loadFilteredAds}
+                        onSubmitEditing={() => loadFilteredAds()}
                         placeholder={t('search.placeholder', 'What are you looking for?')}
                         placeholderTextColor="#757575"
                         textAlign={isArabic ? 'right' : 'left'}
@@ -101,14 +91,19 @@ const SearchScreen = ({ navigation, route }: any) => {
                     contentContainerStyle={styles.filterRow}
                     data={[
                         { id: 'filter', label: 'Filters', isIcon: true, icon: 'options-outline', active: true },
-                        { id: 'location', label: 'All country', isIcon: true, icon: 'location-outline' },
-                        { id: 'category', label: initialCategory === '23' ? 'Cars for sale' : 'Category' },
+                        { id: 'category', label: initialCategoryName || 'Category' },
                     ]}
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
                         <TouchableOpacity
                             style={[styles.pill, item.active && styles.pillActive]}
-                            onPress={() => item.id === 'filter' ? navigation.navigate('FilterScreen', { categoryId: initialCategory }) : null}
+                            onPress={() => {
+                                if (item.id === 'filter') {
+                                    navigation.navigate('FilterScreen', { categoryId: initialCategory });
+                                } else if (item.id === 'category') {
+                                    navigation.navigate('CategoryListScreen');
+                                }
+                            }}
                         >
                             {item.isIcon && <Ionicons name={item.icon!} size={16} color={item.active ? '#00BCD4' : '#3B3B3B'} style={styles.pillIcon} />}
                             <Text style={[styles.pillText, item.active && styles.pillTextActive]}>

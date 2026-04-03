@@ -32,9 +32,9 @@ const LocationModal: React.FC<LocationModalProps> = ({ visible, onClose, onSelec
     const loadLocations = async () => {
         setLoading(true);
         try {
-            // Fetch level 1 locations (Governorates in Lebanon context)
+            // Fetch level 2 locations (Cities/Areas in Lebanon context)
             const response = await fetchLocations({
-                level: 1,
+                level: 2,
                 language: isArabic ? 'ar' : 'en'
             } as any);
 

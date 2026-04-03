@@ -33,7 +33,7 @@ export const fetchAds = async (
     const mustConditions: any[] = [];
 
     if (categoryId) {
-      mustConditions.push({ term: { 'category.externalID': categoryId } });
+      mustConditions.push({ term: { 'category.id': categoryId } });
     }
 
     if (locationId && locationId !== '0-1') {

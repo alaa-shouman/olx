@@ -2,6 +2,12 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, I18nManager } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
+export interface MetaItemData {
+    key: string;
+    value: string | number;
+    icon: string;
+}
+
 export interface SearchListingData {
     id: string;
     title: string;
@@ -11,14 +17,7 @@ export interface SearchListingData {
     location: string;
     timestamp: string;
     isElite?: boolean;
-    meta?: {
-        year?: string;
-        mileage?: string;
-        fuel?: string;
-        beds?: number;
-        baths?: number;
-        area?: number;
-    };
+    meta?: MetaItemData[];
     isFavorite?: boolean;
 }
 
@@ -54,44 +53,14 @@ const SearchListingCard: React.FC<SearchListingCardProps> = ({ item, onPress, on
                 <Text style={styles.price}>{item.currency} {item.price}</Text>
                 <Text style={styles.title} numberOfLines={2}>{item.title}</Text>
 
-                {item.meta ? (
+                {item.meta && item.meta.length > 0 ? (
                     <View style={styles.metaRow}>
-                        {item.meta.year && (
-                            <View style={styles.metaItem}>
-                                <Ionicons name="calendar-outline" size={14} color="#757575" />
-                                <Text style={styles.metaText}>{item.meta.year}</Text>
+                        {item.meta.slice(0, 6).map((m, index) => (
+                            <View key={`${m.key}-${index}`} style={styles.metaItem}>
+                                <Ionicons name={m.icon} size={14} color="#757575" />
+                                <Text style={styles.metaText}>{m.value}</Text>
                             </View>
-                        )}
-                        {item.meta.mileage && (
-                            <View style={styles.metaItem}>
-                                <Ionicons name="speedometer-outline" size={14} color="#757575" />
-                                <Text style={styles.metaText}>{item.meta.mileage} km</Text>
-                            </View>
-                        )}
-                        {item.meta.fuel && (
-                            <View style={styles.metaItem}>
-                                <Ionicons name="water-outline" size={14} color="#757575" />
-                                <Text style={styles.metaText}>{item.meta.fuel}</Text>
-                            </View>
-                        )}
-                        {item.meta.beds !== undefined && (
-                            <View style={styles.metaItem}>
-                                <Ionicons name="bed-outline" size={14} color="#757575" />
-                                <Text style={styles.metaText}>{item.meta.beds}</Text>
-                            </View>
-                        )}
-                        {item.meta.baths !== undefined && (
-                            <View style={styles.metaItem}>
-                                <Ionicons name="water-outline" size={14} color="#757575" />
-                                <Text style={styles.metaText}>{item.meta.baths}</Text>
-                            </View>
-                        )}
-                        {item.meta.area !== undefined && (
-                            <View style={styles.metaItem}>
-                                <Ionicons name="scan-outline" size={14} color="#757575" />
-                                <Text style={styles.metaText}>{item.meta.area} m²</Text>
-                            </View>
-                        )}
+                        ))}
                     </View>
                 ) : null}
 
@@ -157,7 +126,7 @@ const styles = StyleSheet.create({
     favoriteBtn: {
         position: 'absolute',
         top: 12,
-        right: 12,
+        end: 12,
         backgroundColor: 'rgba(0,0,0,0.4)',
         borderRadius: 20,
         padding: 6,
