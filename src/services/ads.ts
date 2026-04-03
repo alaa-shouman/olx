@@ -47,7 +47,7 @@ export const fetchAds = async (
     if (searchTerm) {
       mustConditions.push({
         query_string: {
-          query: `*${searchTerm}*` // add wildcards for better partial matching
+          query: `*${searchTerm}*`, // add wildcards for better partial matching
         },
       });
     }
