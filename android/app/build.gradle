@@ -100,9 +100,9 @@ android {
         }
         release {
       storeFile file('key_name.keystore')
-      storePassword 'Alaash@313'
+      storePassword ''
       keyAlias 'key_alias'
-      keyPassword 'Alaash@313'
+      keyPassword ''
     }
     }
     buildTypes {
