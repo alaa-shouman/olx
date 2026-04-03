@@ -37,11 +37,11 @@ const SearchScreen = ({ navigation, route }: any) => {
 
                 const title = isArabic ? (source.title_l1 || source.title) : source.title;
                 const locName = isArabic ? (source.location[2].name_l1 || source.location[2].name) : (source.location[2].name || source.location[2].name_l1);
-console.log('locName :>> ', source.location[2].name);
+                console.log('locName :>> ', source.location[2].name);
                 return {
                     id: String(source.id),
                     title: title,
-                    price : source.extraFields?.price?.toLocaleString() || source.price?.toString() || '0',
+                    price: source.extraFields?.price?.toLocaleString() || source.price?.toString() || '0',
                     currency: source.price?.currency?.isoCode || 'USD',
                     imageUrl: source.mainImage?.url || source.images?.[0]?.url,
                     location: locName || '',
@@ -59,8 +59,15 @@ console.log('locName :>> ', source.location[2].name);
 
     useEffect(() => {
         setSearchQuery(initialQuery);
-        loadFilteredAds(initialQuery);
-    }, [initialCategory, initialQuery]);
+    }, [initialQuery]);
+
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            loadFilteredAds(searchQuery);
+        }, 300);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchQuery, initialCategory]);
 
     return (
         <SafeAreaView style={styles.container}>

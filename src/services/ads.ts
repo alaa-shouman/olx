@@ -46,10 +46,8 @@ export const fetchAds = async (
     // Term search text query
     if (searchTerm) {
       mustConditions.push({
-        multi_match: {
-          query: searchTerm,
-          fields: ['title^3', 'description'],
-          fuzziness: 'AUTO',
+        query_string: {
+          query: `*${searchTerm}*` // add wildcards for better partial matching
         },
       });
     }
